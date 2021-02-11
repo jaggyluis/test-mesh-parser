@@ -61,6 +61,10 @@ export class BoundingBox2D {
             point[1] >= this.dimY[0] && point[1] <= this.dimY[1];
     }
 
+    /**
+     * 
+     * @TODO - not optimized
+     */
     containsOther(bounds : BoundingBox2D) {
         for (let point of bounds.iterableCorners()) {
             if (!this.contains(point)) {
@@ -70,7 +74,11 @@ export class BoundingBox2D {
         return true;
     }
 
-    intersectssOther(bounds : BoundingBox2D) {
+    /**
+     * 
+     * @TODO - not optimized
+     */
+    intersectsOther(bounds : BoundingBox2D) {
         for (let point of bounds.iterableCorners()) {
             if (this.contains(point)) {
                 return true;
@@ -114,11 +122,23 @@ export interface Bounded2D {
 export class QuadTree<T extends Bounded2D> implements Bounded2D {
 
     private readonly MAX_ITEMS = 10;
+
     private readonly MAX_LEVELS = 5;
+
+    private readonly _items : T[] = [];
 
     private readonly _nodes : QuadTree<T>[] = [];
 
-    private readonly _items : T[] = [];
+    private _nodeIndex(bounds : BoundingBox2D) {
+
+        for (let i = 0; i<this._nodes.length; i++) {
+            if (this._nodes[i].bounds.containsOther(bounds)) {
+                return i;
+            }
+        }
+
+        return -1;
+    }
 
     private _split() {
 
@@ -132,28 +152,15 @@ export class QuadTree<T extends Bounded2D> implements Bounded2D {
         this._nodes.push(new QuadTree<T>(BoundingBox2D.fromDimensions([x + w /2, x + w ], [y, y + h/2]),  this._level + 1)); // bl
     }
 
-    private _indexSubNode(bounds : BoundingBox2D) {
-
-        for (let i = 0; i<this._nodes.length; i++) {
-            if (this._nodes[i].bounds.containsOther(bounds)) {
-                return i;
-            }
-        }
-
-        return -1;
-    }
-
     constructor(private readonly _bounds : BoundingBox2D, private readonly _level : number = 0) {}
 
     get bounds() { return this._bounds; }
 
-    *itemsIterator(includeSubItems : boolean = false, ignoreSubNodes : number[] = []) : Generator<T> {
-        if (includeSubItems) {
-            for (let i = 0; i< this._nodes.length; i++) {
-                if (!ignoreSubNodes.includes(i)) {
-                    for (let item of this._nodes[i].itemsIterator(includeSubItems)) {
-                        yield item;
-                    }
+    *itemsIterator(ignoreSubNodes : number[] = []) : Generator<T> {
+        for (let i = 0; i< this._nodes.length; i++) {
+            if (!ignoreSubNodes.includes(i)) {
+                for (let item of this._nodes[i].itemsIterator()) {
+                    yield item;
                 }
             }
         }
@@ -162,17 +169,24 @@ export class QuadTree<T extends Bounded2D> implements Bounded2D {
         }
     }
 
+    /**
+     * 
+     * @Time O(n) - we might need to split the node and re-insert all items 
+     */
     insert(item : T, force : boolean = false) {
         if (this._nodes.length) {
-            const index = this._indexSubNode(item.bounds);
+            const index = this._nodeIndex(item.bounds);
             if (index != -1) {
                 this._nodes[index].insert(item);
                 return;
             }
         }
 
+        // if we got here, the item did not fit in any sub nodes
         this._items.push(item);
 
+        // if we are forcing an insert, it will go into this node without checking subnodes
+        // this flag is mainly here to prevent infinite recursion
         if (force) return;
 
         if (this._items.length > this.MAX_ITEMS && this._level < this.MAX_LEVELS) {
@@ -193,14 +207,17 @@ export class QuadTree<T extends Bounded2D> implements Bounded2D {
      * @Time - worst case O(n), 
      */
     search(bounds : BoundingBox2D, filter : (item : T, node : QuadTree<T> ) => boolean = () => true ) : T | null {
-        const index = this._indexSubNode(bounds);
+        const index = this._nodeIndex(bounds);
         if (index !== -1 && this._nodes.length) {
+            // search the subnode if a match was foind
             const search = this._nodes[index].search(bounds, filter);
             if (search) {
                 return search;
             }
         }
-        for (let item of this.itemsIterator(true, [index])) {
+        // if the search is not complete, search other subnodes, then the items in this node, but ignore the node at index
+        // since we already searched it
+        for (let item of this.itemsIterator([index])) {
             if (filter(item, this)) {
                 return item;
             }
@@ -210,14 +227,16 @@ export class QuadTree<T extends Bounded2D> implements Bounded2D {
 
     /**
      * 
-     * Actual intersection test for range searching
+     * Range searching
      */
     retrieve(bounds : BoundingBox2D, result : T[] = []) {
-        const index = this._indexSubNode(bounds);
+        const index = this._nodeIndex(bounds);
         if (index !== -1 && this._nodes.length) {
-            this._nodes[index].retrieve(bounds, result);
+            // retrieve any items from the matched tree node
+            this._nodes[index].retrieve(bounds, result); 
         }
-        for (let item of this.itemsIterator(false)) {
+        // retrieve items in this node only
+        for (let item of this.itemsIterator([0,1,2,3])) { 
             result.push(item);
         }
         return result;

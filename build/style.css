@@ -5,7 +5,7 @@ html, body, canvas {
     margin: 0;
     background-color:  grey;
     font-family: monospace;
-    font-size: 1.2em;
+    font-size: medium;
     overflow: hidden;
 }
 
@@ -68,6 +68,7 @@ html, body, canvas {
     right: 0;
     padding: 5px 20px;
     color: cyan;
+    pointer-events: none;
 }
 
 #optimize {

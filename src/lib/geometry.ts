@@ -6,11 +6,15 @@ import { Bounded2D, BoundingBox2D } from "./bbox";
  */
 export type Vector2D = [number, number];
 
+export type Vector4D = [number, number, number, number];
+
 export type Point2D = Vector2D;
 
-export type Point4D = [number, number, number, number];
+export type Triangle = [Point2D, Point2D, Point2D];
 
-export type Path = [number, number, ...number[]];
+export type Path = [number, number, ...number[]]; // paths should have at least 2 points
+
+export type Id = string | number;
 
 export class Polygon2D implements Bounded2D {
 
@@ -20,7 +24,7 @@ export class Polygon2D implements Bounded2D {
 
     private _area : number | null = null;
 
-    constructor(points: Point2D[] = [], private readonly _id : string | number | null = null) {
+    constructor(points: Point2D[] = [], private readonly _id : Id | null = null) {
 
         points.forEach(p => this.addPoint2D(p));
     }
@@ -30,6 +34,8 @@ export class Polygon2D implements Bounded2D {
     get id() { return this._id; }
 
     get area() { return Math.abs(this.signedArea()); }
+
+    get points() { return this._points; }
 
     isClockwise() {
         
@@ -59,7 +65,7 @@ export class Polygon2D implements Bounded2D {
     addPoint2D(point: Point2D) {
         this._bounds.update(point);
         this._points.push(point);
-        this._area = null;
+        this._area = null; // invalidate the area when a new point is added
     }
 
     contains(point: Point2D) {
@@ -77,7 +83,7 @@ export class Polygon2D implements Bounded2D {
         }
     }
 
-    static fromPath(path: Path, vertices: Point2D[], id : string | number | null = null) {
+    static fromPath(path: Path, vertices: Point2D[], id : Id | null = null) {
 
         const pgon = new Polygon2D([], id);
         path.forEach(i => pgon.addPoint2D(vertices[i]));;;
@@ -110,4 +116,47 @@ export function vectorTwoPoints(start: Point2D, end: Point2D) {
 
 export function vectorEquality(v1: Vector2D, v2: Vector2D) {
     return v1[0] === v2[0] && v1[1] === v2[1];
+}
+
+export function triangleContains(triangle : Triangle, point : Point2D) {
+
+}
+
+export function triangleArea(triangle : Triangle) {
+
+}
+
+/**
+ * Ported this https://github.com/linuxlewis/tripy/blob/master/tripy.py
+ * @link https://www.geometrictools.com/Documentation/TriangulationByEarClipping.pdf
+ * @param polygon 
+ */
+function earclip(polygon : Polygon2D) : Path[] {
+
+    if (polygon.isClockwise()) return []; // not going to deal with this condition since the app shouldnt be creating them
+
+    const triangles : Path[] = [];
+
+    const ear  = [];
+
+    const points = [...polygon.points];
+
+    for (let currIndex = 0; currIndex < polygon.points.length; currIndex++ ) {
+
+        let prevIndex = currIndex === 0 ? polygon.points.length -1 : currIndex-1;
+        let prevPoint = points[prevIndex];
+        
+        let currPoint = points[currIndex];
+
+        let nextIndex = (currIndex + 1) % points.length;
+        let nextPoint = points[nextIndex];
+        
+
+    }
+
+    return [];
+
+    function isEar(p1 : Point2D , p2 : Point2D, p3 : Point2D) {
+
+    }
 }

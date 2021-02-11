@@ -6,6 +6,10 @@ export type AdjacencySet = { [nodeIndex: number]: Set<number> };
 
 export type AdjacencyList = { [nodeIndex: number]: number[] };
 
+/**
+ * Main Graph class - this is mainly just a wrapper for an adjacency list -> adjacency set, so that we can get a faster insert/delete/lookup for adjacencies
+ * rather than having to iterate the whole adjacency list for a node/vertex
+ */
 export class Graph {
 
     protected _adjacencies: AdjacencySet = {};
@@ -61,6 +65,11 @@ export class Graph {
         }
     }
 
+    /**
+     * 
+     * @param edge 
+     * @param directed defaults to false - will add the reverse edge
+     */
     addEdge(edge: Edge, directed = false) {
         this._addEdge(edge);
         if (!directed) {
@@ -68,6 +77,11 @@ export class Graph {
         }
     }
 
+    /**
+     * 
+     * @param edge 
+     * @param directed defaults to false - will remove the reverse edge
+     */
     removeEdge(edge: Edge, directed = false) {
         this._removeEdge(edge);
         if (!directed) {
@@ -87,7 +101,7 @@ export class Graph {
         for (let nodeIndex of this.iterableNodeIndices()) {
             adjacencies[nodeIndex] = [...this.iterableNeighborIndices(nodeIndex)];
         }
-        return { adjacencies };
+        return adjacencies;
     }
 
     /**
@@ -111,7 +125,7 @@ export class Graph {
         // list of all visited nodes from the graph
         const visited = new Set<number>();
         // queue element for this search is not a single node, but a whole layer
-        const queue = [new Set<number>([startNodeIndex])];
+        const queue : Set<number>[] = [new Set<number>([startNodeIndex])];
         // run the bfs search
         while (queue.length) {
             // building the output layer here from the set

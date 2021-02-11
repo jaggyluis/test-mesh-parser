@@ -49,7 +49,8 @@ import { Graph } from './lib/graph';
 
         const menuItem = document.createElement('div');
         menuItem.className = 'menu-item'
-        menuItem.innerText = `graph ${i} : [E=${t.edges.length}, V=${t.vertices.length}]`
+        menuItem.innerText = t.name ? `${t.name }`: `graph ${i}`;
+        menuItem.innerText += `: [E=${t.edges.length}, V=${t.vertices.length}]`;
 
         // select a new graph for viewing and analysis
         menuItem.addEventListener('click', () => {
@@ -69,10 +70,16 @@ import { Graph } from './lib/graph';
             let mesh = new FVMesh(meshData);
             let meshFaceIndex = -1;
 
+            console.log(JSON.stringify(meshData));
+
             if (renderer) {
                 renderer.clear();
                 renderer.setMesh(mesh);
-                renderer.renderFill(meshFaceColors);
+                renderer.renderMeshFill(meshFaceColors);
+
+                if (t.edges.length < 10000) renderer.renderEdges(t.edges); // hard to see colors on large meshes when edges are rendered
+                if (t.edges.length < 10000) renderer.renderMeshLines(); // hard to see colors on large meshes when edges are rendered
+
                 renderer.onMeshMouseMove((point, mouseEvent) => { // this method will return the mouse cursor remapped to the active mesh coordinate system
 
                     const faceIndex = optimize ? runA3Optimmized(mesh, point) : runA3(meshData, point);
@@ -85,15 +92,18 @@ import { Graph } from './lib/graph';
 
                         meshFaceLayers.forEach((layer, depth) => {
                             const val = depth / (meshFaceLayers.length || 1)
-                            const color: Color3fv = [val, val, val];
+                            const color: Color3fv = [val, 1, 1];
                             layer.forEach(l => meshFaceColors[l] = color);
                         });
 
                         if (renderer) {
                             renderer.clear()
-                            renderer.renderFill(meshFaceColors);
-                            renderer.renderFace(faceIndex, [1, 1, 1])
-                            meshFaceAdjacencies.forEach(j => renderer.renderFace(j, [0, 0, 0]));
+                            renderer.renderMeshFill(meshFaceColors);
+                            renderer.renderMeshFace(faceIndex, [1, 1, 1]);
+                            meshFaceAdjacencies.forEach(j => renderer.renderMeshFace(j, [0, 0, 0]));
+
+                            if (t.edges.length < 10000) renderer.renderEdges(t.edges); // hard to see colors on large meshes when edges are rendered
+                            if (t.edges.length < 10000) renderer.renderMeshLines(); // hard to see colors on large meshes when edges are rendered
                         }
 
                         tooltip.classList.add('active');
@@ -104,7 +114,10 @@ import { Graph } from './lib/graph';
                         meshFaceColors = meshData.faces.map(f => randomColor3fv());
 
                         renderer.clear();
-                        renderer.renderFill(meshFaceColors);
+                        renderer.renderMeshFill(meshFaceColors);
+
+                        if (t.edges.length < 10000) renderer.renderEdges(t.edges); // hard to see colors on large meshes when edges are rendered
+                        if (t.edges.length < 10000) renderer.renderMeshLines(); // hard to see colors on large meshes when edges are rendered
 
                         tooltip.classList.remove('active');
                         tooltip.innerHTML = '';
@@ -118,57 +131,7 @@ import { Graph } from './lib/graph';
                     meshFaceIndex = faceIndex;
                 })
             }
- 
-            // don't add any submenus if the mesh has no faces
-            if (meshData.faces) {
-
-                const submenuItems: HTMLElement[] = [];
-
-                const subMenu = document.createElement('div');
-                subMenu.className = 'sub-menu';
-                menuItem.appendChild(subMenu);
-
-                subMenu.addEventListener('mouseleave', () => {
-                    if (renderer) {
-                        renderer.clear();
-                        renderer.renderFill();
-                    }
-                })
-
-                meshData.faces.forEach((face, i) => {
-
-                    let meshFaceIndex = i;
-                    let meshFaceAdjacencies: number[] = [];
-
-                    const submenuItem = document.createElement('div');
-                    submenuItem.className = 'menu-item'
-                    submenuItem.innerText = `face ${i}`
-
-                    submenuItem.addEventListener('mouseenter', () => {
-
-                        meshFaceAdjacencies = runA2(meshData, meshFaceIndex);
-
-                        let meshFaceLayers = runA4(meshData as FVMeshData, meshFaceIndex);
-
-                        meshFaceLayers.forEach((layer, depth) => {
-                            const val = depth / (meshFaceLayers.length || 1)
-                            const color: Color3fv = [val, val, val];
-                            layer.forEach(l => meshFaceColors[l] = color);
-                        });
-
-                        if (renderer) {
-                            renderer.clear()
-                            renderer.renderFill(meshFaceColors);
-                            renderer.renderFace(meshFaceIndex, [1, 1, 1])
-                            meshFaceAdjacencies.forEach(j => renderer.renderFace(j, [0, 0, 0]));
-                        }
-                    });
-
-                    submenuItems.push(submenuItem);
-                    subMenu.appendChild(submenuItem);
-                });
-            }
-        });
+         });
 
         menuItems.push(menuItem);
         menu.appendChild(menuItem);
@@ -195,7 +158,7 @@ import { Graph } from './lib/graph';
      */
     function runA2(data: FVMeshData, faceIndex: number): number[] {
         const now = Date.now();
-        const result = data.adjacencies[faceIndex] || [];
+        const result = data.faceAdjacencies[faceIndex] || [];
         logToScreen(`calc A2 [F=${result.length}] took ${Date.now() - now}ms`);
         return result;
     }
@@ -247,7 +210,7 @@ import { Graph } from './lib/graph';
      */
     function runA4(data: FVMeshData, faceIndex: number) {
         const now = Date.now();
-        const result = Graph.BFSLayers(data.adjacencies, faceIndex);
+        const result = Graph.BFSLayers(data.faceAdjacencies, faceIndex);
         logToScreen(`calc A4 [F=${data.faces.length} L=${result.length}] took ${Date.now() - now}ms`);
         return result;
     }
