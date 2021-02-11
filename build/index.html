@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HIGHARC</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <canvas id='view'></canvas>
+    <div id='menu'></div>
+    <div id='log'></div>
+    <div id='tooltip'></div>
+    <button id='optimize'>optimize</button>
+    <script>
+        // no resizing implemeted
+        const view = document.getElementById('view');
+        view.width = window.innerWidth;
+        view.height = window.innerHeight;
+    </script>
+    <script src="index.js"></script>
+</body>
+</html>

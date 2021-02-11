@@ -1,0 +1,91 @@
+html, body, canvas {
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    margin: 0;
+    background-color:  grey;
+    font-family: monospace;
+    font-size: 1.2em;
+    overflow: hidden;
+}
+
+*::-webkit-scrollbar {
+    width: 5px;              
+  }
+  
+*::-webkit-scrollbar-track {
+    background: rgba(255,255,255, 0.05);      
+}
+  
+*::-webkit-scrollbar-thumb {
+    background-color: white;   
+}
+
+#menu {
+    position: fixed;
+    top:0;
+    max-height: 100%;
+    overflow-y: auto;
+}
+
+#tooltip {
+    position: absolute;
+    visibility: hidden;
+    color: aqua;
+}
+
+#tooltip.active {
+    visibility: visible;
+}
+
+.sub-menu {
+    color: black;
+    max-height: 300px;
+    overflow-y: auto;
+    margin-top: 20px;
+}
+
+.menu-item  {
+    pointer-events: all;
+    padding: 5px 20px;
+    white-space: nowrap;
+
+}
+
+.menu-item.selected {
+    color: white;
+}
+
+.menu-item:hover {
+    color: lightblue;
+}
+
+#log {
+    position: fixed;
+    top: 40px;
+    right: 0;
+    padding: 5px 20px;
+    color: cyan;
+}
+
+#optimize {
+    font-family: monospace;
+    position: absolute;
+    top: 0;
+    right : 0;
+    z-index: 3;
+    margin: 10px;
+    background: transparent;
+    color: white;
+    border: 2px solid white;
+    /* border: none; */
+    outline : none;
+    padding: 10px;
+    font-size: 1em;
+}
+
+#optimize.selected {
+    color: cyan;
+    border: 2px solid cyan;
+    padding: 10px;
+}
