@@ -51,7 +51,9 @@ and converts it to :
 
 ### Installing 
 
--   clone this repo, and run in Node.js
+-   clone this repo
+-   run npm install to get typescript and webpack installed
+-   run one of [npm run build/ npm run start / npm run test (broken)] to get up and running
 
 ### Running Tests
 ```
