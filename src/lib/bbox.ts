@@ -190,7 +190,7 @@ export class QuadTree<T extends Bounded2D> implements Bounded2D {
      * Post order traversal of the Quad tree with bounds as a heuristic
      * If a filter is provided, it will be used a a mapper function to determine if a result has been bound
      * 
-     * @Time - worst case O(n), but probably 
+     * @Time - worst case O(n), 
      */
     search(bounds : BoundingBox2D, filter : (item : T, node : QuadTree<T> ) => boolean = () => true ) : T | null {
         const index = this._indexSubNode(bounds);
@@ -210,7 +210,7 @@ export class QuadTree<T extends Bounded2D> implements Bounded2D {
 
     /**
      * 
-     * Actual intersection test for true results
+     * Actual intersection test for range searching
      */
     retrieve(bounds : BoundingBox2D, result : T[] = []) {
         const index = this._indexSubNode(bounds);

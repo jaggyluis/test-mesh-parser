@@ -32,6 +32,8 @@ html, body, canvas {
     position: absolute;
     visibility: hidden;
     color: aqua;
+    font-size: 1.2em;
+    pointer-events: none;
 }
 
 #tooltip.active {

@@ -283,6 +283,7 @@ export class WebGLCanvasFVMeshRenderer {
     }
 
     onMeshMouseMove(callback : (modelPoint : Point2D, mouseEvent : MouseEvent ) => void) {
+        
         this._meshMouseMoveCallback = callback;
     }
 

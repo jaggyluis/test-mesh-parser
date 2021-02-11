@@ -130,6 +130,10 @@ export class FVMesh extends Graph implements Bounded2D {
         });
     }
 
+    /**
+     * @Time O(E*(V+ElogE)) = O(E*2VLogE) worst case (1 big cycle)
+     * @param pointGraphEdgeData input data for A1
+     */
     static fromPointGraphEdgeData(pointGraphEdgeData: PointGraphEdgeData) {
 
         const vertices = pointGraphEdgeData.vertices;
@@ -210,6 +214,9 @@ export class FVMesh extends Graph implements Bounded2D {
 
         const meshFaceEdgeAdjacencies: { [edgeId: string]: number[] } = {}
 
+        /**
+         * Run DFS for every edge with a vertex with at least 2 connections
+         */
         for (let edge of graph.iterableEdges(2)) {
 
             const face = findCCWCycleForPathDFS(edge);

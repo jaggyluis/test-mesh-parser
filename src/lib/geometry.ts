@@ -36,6 +36,9 @@ export class Polygon2D implements Bounded2D {
         return this.signedArea() > 0;
     }
 
+    /**
+     * Calculate winding direction and area - a < 0 ? CCW : CW 
+     */
     signedArea() {
 
         if (!this._area) {
@@ -63,7 +66,13 @@ export class Polygon2D implements Bounded2D {
         if (!this._bounds.contains(point)) {
             return false;
         } else {
-            // TODO
+            /**
+             * @NOTE - this is the big missing piece here for containment checks 
+             * @TODO - needs to be implemented
+             * 
+             * The implementation of this will also resolve the meshing issues on the renderer side -
+             * cannot currently mesh convex pgons correctly
+             */
             return true;
         }
     }
