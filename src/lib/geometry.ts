@@ -42,6 +42,11 @@ export class Polygon2D implements Bounded2D {
         return this.signedArea() > 0;
     }
 
+    /**
+     * @TODO - this needs work. should be cached from the signed area calculation and added
+     * to the FVMeshBoundedPoint class, so that we can determine how to triangulate without
+     * needing to do all the other stuff.
+     */
     isConvex() { 
 
         return true;
@@ -102,6 +107,10 @@ export class Polygon2D implements Bounded2D {
             for (let triangle of fan(this)) {
                 yield triangle;
             }
+        } else {
+            for (let triangle of earclip(this)) {
+                yield triangle;
+            }
         }
     }
 
@@ -159,47 +168,15 @@ export function triangleContains(triangle : Triangle, point : Point2D) {
     return true;
 }
 
-export function triangleArea(triangle : Triangle) {
 
-}
-
-function *fan(polygon : Polygon2D) {
+function *fan(polygon : Polygon2D) : Generator<Triangle> {
     for (let i = 1; i < polygon.points.length -1; i++) {
         yield [polygon.points[0], polygon.points[i], polygon.points[i+1]] as Triangle
     }
 }
 
-/**
- * Ported this https://github.com/linuxlewis/tripy/blob/master/tripy.py
- * @link https://www.geometrictools.com/Documentation/TriangulationByEarClipping.pdf
- * @param polygon 
- */
-function earclip(polygon : Polygon2D) : Triangle[] {
-
-    if (polygon.isClockwise()) return []; // not going to deal with this condition since the app shouldnt be creating them
-
-    const triangles : Triangle[] = [];
-
-    const ear  = [];
-
-    const points = [...polygon.points];
-
-    for (let currIndex = 0; currIndex < polygon.points.length; currIndex++ ) {
-
-        let prevIndex = currIndex === 0 ? polygon.points.length -1 : currIndex-1;
-        let prevPoint = points[prevIndex];
-        
-        let currPoint = points[currIndex];
-
-        let nextIndex = (currIndex + 1) % points.length;
-        let nextPoint = points[nextIndex];
-        
-
-    }
-
-    return [];
-
-    function isEar(p1 : Point2D , p2 : Point2D, p3 : Point2D) {
-
-    }
+function *earclip(polygon : Polygon2D) : Generator<Triangle> {
+    /**
+     * @TODO
+     */
 }

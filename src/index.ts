@@ -8,7 +8,7 @@ import { Graph } from './lib/graph';
 
 (() => {
 
-    let optimize = false;
+    let cache = false;
 
     // show active face index
     const tooltip = document.getElementById('tooltip') as HTMLDivElement;
@@ -29,14 +29,14 @@ import { Graph } from './lib/graph';
     }
 
     // switch between running point intersection algorythm from raw data vs cached mesh class 
-    const button = document.getElementById('optimize') as HTMLButtonElement;
+    const button = document.getElementById('cache') as HTMLButtonElement;
     button.addEventListener("click", () => {
-        optimize = !optimize;
-        if (!optimize) {
-            button.innerText = 'optimize';
+        cache = !cache;
+        if (!cache) {
+            button.innerText = 'cache mesh [faster]';
             button.classList.remove('selected');
         } else {
-            button.innerText = 'optimized [cached mesh]';
+            button.innerText = 'mesh cached [click to rebuild dynamically]';
             button.classList.add('selected');
         }
     });
@@ -83,7 +83,7 @@ import { Graph } from './lib/graph';
 
                 renderer.onMeshMouseMove((point, mouseEvent) => { // this method will return the mouse cursor remapped to the active mesh coordinate system
 
-                    const faceIndex = optimize ? runA3Optimmized(mesh, point) : runA3(meshData, point);
+                    const faceIndex = cache ? runA3Optimmized(mesh, point) : runA3(meshData, point);
 
                     // a new face has appeared!!
                     if (faceIndex >= 0 && faceIndex !== meshFaceIndex) {

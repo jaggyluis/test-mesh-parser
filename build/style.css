@@ -71,7 +71,7 @@ html, body, canvas {
     pointer-events: none;
 }
 
-#optimize {
+button {
     font-family: monospace;
     position: absolute;
     top: 0;
@@ -87,7 +87,7 @@ html, body, canvas {
     font-size: 1em;
 }
 
-#optimize.selected {
+button.selected {
     color: cyan;
     border: 2px solid cyan;
     padding: 10px;
