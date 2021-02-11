@@ -135,13 +135,8 @@ export class FVMesh implements Bounded2D {
             onFaceSearched(facePoint.faceIndex, ++searchCount);
 
             if (facePoint.faceBounds.contains(point)) {
-                // const facePgon = Polygon2D.fromPath(this._faces[facePoint.faceIndex], this._vertices);
-                // if (facePgon.contains(point)) {
-                //     return true;
-                // }
-                // return false;
-
-                return true;
+                const facePgon = Polygon2D.fromPath(this._faces[facePoint.faceIndex], this._vertices);       
+                return facePgon.contains(point);
             }
 
             return false;

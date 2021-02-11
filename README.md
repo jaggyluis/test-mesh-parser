@@ -22,7 +22,7 @@ Small Mesh parsing application that converts a set of edges and vertices in the 
 
 and converts it to :
 
-```json
+```js
 {
 	"faces": [
 		[0, 1, 2],
@@ -60,7 +60,7 @@ and converts it to :
 
 Test Data has the same format as the input data above with the additional optional properties:
 
-```json
+```js
 {
     ... //same as output data above
     "name": "rectangle with diagonal", // the test name
@@ -75,6 +75,8 @@ Test Data has the same format as the input data above with the additional option
 }
 ```
 
+Currently, all tests reside in the ./src/data/data.ts file. adding new tests involves either appending to that object, or replacing it with a new one.
+
 ### Running Application in Dev mode
 ```
 npm run start
@@ -87,7 +89,13 @@ npm run build
 
 ## TODO
 
+- optimize triangulation and bounding checks for polygons - right now it's using a pretty primitive implementation
+- implement triangulation and bounding checks for non convex polygons
+- implement rendering for non convex polygons - right now it is treating all polygons as convex for rendering which produces incorrect visuals
+
 - implement testing for :
     - adjacencies
     - adjacency layers
     - point inclusion
+
+- save data and load data buttons for renderer

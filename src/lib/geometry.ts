@@ -42,6 +42,11 @@ export class Polygon2D implements Bounded2D {
         return this.signedArea() > 0;
     }
 
+    isConvex() { 
+
+        return true;
+    }
+
     /**
      * Calculate winding direction and area - a < 0 ? CCW : CW 
      */
@@ -68,18 +73,35 @@ export class Polygon2D implements Bounded2D {
         this._area = null; // invalidate the area when a new point is added
     }
 
+    /**
+     * This is not a great solution for point containment, but works for now 
+     *
+     * @NOTE - this is the big missing piece here for containment checks 
+     * @TODO - needs to be implemented
+     * 
+     * The implementation of this will also resolve the meshing issues on the renderer side -
+     * cannot currently mesh convex pgons correctly
+     */
+
     contains(point: Point2D) {
         if (!this._bounds.contains(point)) {
             return false;
         } else {
-            /**
-             * @NOTE - this is the big missing piece here for containment checks 
-             * @TODO - needs to be implemented
-             * 
-             * The implementation of this will also resolve the meshing issues on the renderer side -
-             * cannot currently mesh convex pgons correctly
-             */
-            return true;
+            for (let triangle of this.triangulationIterator()) { // shouldnt need to do this 
+                if (triangleContains(triangle, point)) { 
+                    return true;
+                }
+            }
+
+            return false;
+        }
+    }
+
+    *triangulationIterator() : Generator<Triangle> {
+        if (this.isConvex()) {
+            for (let triangle of fan(this)) {
+                yield triangle;
+            }
         }
     }
 
@@ -120,10 +142,31 @@ export function vectorEquality(v1: Vector2D, v2: Vector2D) {
 
 export function triangleContains(triangle : Triangle, point : Point2D) {
 
+    for (let i = 0; i < triangle.length; i++) {
+
+        let prevIndex = i === 0 ? triangle.length -1 : i-1;
+        let nextIndex = (i+1)%triangle.length;
+
+        const prevVec = vectorTwoPoints(triangle[i], triangle[prevIndex])
+        const testVec = vectorTwoPoints(triangle[i], point);
+        const nextVec = vectorTwoPoints(triangle[i], triangle[nextIndex]);
+        
+        if (angleTwoVectors(nextVec, testVec) > angleTwoVectors(nextVec, prevVec)) {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 export function triangleArea(triangle : Triangle) {
 
+}
+
+function *fan(polygon : Polygon2D) {
+    for (let i = 1; i < polygon.points.length -1; i++) {
+        yield [polygon.points[0], polygon.points[i], polygon.points[i+1]] as Triangle
+    }
 }
 
 /**
@@ -131,11 +174,11 @@ export function triangleArea(triangle : Triangle) {
  * @link https://www.geometrictools.com/Documentation/TriangulationByEarClipping.pdf
  * @param polygon 
  */
-function earclip(polygon : Polygon2D) : Path[] {
+function earclip(polygon : Polygon2D) : Triangle[] {
 
     if (polygon.isClockwise()) return []; // not going to deal with this condition since the app shouldnt be creating them
 
-    const triangles : Path[] = [];
+    const triangles : Triangle[] = [];
 
     const ear  = [];
 

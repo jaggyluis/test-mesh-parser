@@ -67,10 +67,11 @@ import { Graph } from './lib/graph';
 
             let meshData = runA1(data[i]);
             let meshFaceColors = meshData.faces.map(f => randomColor3fv());
+            let meshFaceColorsStatic = [...meshFaceColors]; // only adding this to save the original colors
             let mesh = new FVMesh(meshData);
             let meshFaceIndex = -1;
 
-            console.log(JSON.stringify(meshData));
+            // console.log(JSON.stringify(meshData));
 
             if (renderer) {
                 renderer.clear();
@@ -92,7 +93,9 @@ import { Graph } from './lib/graph';
 
                         meshFaceLayers.forEach((layer, depth) => {
                             const val = depth / (meshFaceLayers.length || 1)
-                            const color: Color3fv = [val, 1, 1];
+                            // const color: Color3fv = [val, 1, 1]; // gradient
+                            // const color = randomColor3fv(); random - epileptic
+                            const color = meshFaceColorsStatic[depth];
                             layer.forEach(l => meshFaceColors[l] = color);
                         });
 
