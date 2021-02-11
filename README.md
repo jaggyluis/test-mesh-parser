@@ -39,7 +39,7 @@ and converts it to :
 		[0, 2]
 	],
 	"faceCentroids": [
-		[1, 1, 2, 2],
+		[1, 1, 2, 2], // [centroidX, centroidY, faceBoundsDX, faceBoundsDY]
 		[1, 1, 2, 2]
 	],
 	"bounds": [
