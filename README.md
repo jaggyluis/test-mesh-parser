@@ -1,5 +1,7 @@
 # Test Mesh Parser
 
+live link - https://jaggyluis.github.io/test-mesh-parser/build/
+
 Small mesh parsing application that inputs a set of edges and vertices in the form of : 
 
 ```json
@@ -74,13 +76,13 @@ Test Data has the same format as the input data above with the additional option
         "0-1-2": ["0-2-3"],
         "0-2-3": ["0-1-2"],
     },
-	"__faceLevels" : {
-		// TODO - will test the adjacent face levels
-	},
-	"__facePoints" : [ // point face inclusion test
-		[0.2, 0.1, 0], // [pointX, pointY, expected faceIndex matched to "__faces" order ]
-		[0.5, 0.8, 1] 
-	]
+    "__faceLevels" : {
+	// TODO - will test the adjacent face levels
+    },
+    "__facePoints" : [ // point face inclusion test
+	[0.2, 0.1, 0], // [pointX, pointY, expected faceIndex matched to "__faces" order ]
+	[0.5, 0.8, 1] 
+    ]
 }
 ```
 
