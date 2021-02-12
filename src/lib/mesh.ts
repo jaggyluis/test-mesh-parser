@@ -1,6 +1,7 @@
 import { Graph, AdjacencyList, Edge } from './graph';
-import { Bounded2D, BoundingBox2D, QuadTree } from './bbox';
-import { angleTwoVectors, Path, Point2D, Vector4D, Polygon2D, Vector2D, vectorTwoPoints } from './geometry';
+import { Bounded2D, BoundingBox2D } from './bbox';
+import { angleTwoVectors, Path, Point2D, Vector4D, Polygon2D, Vector2D, vectorTwoPoints, Triangle } from './geometry';
+import { QuadTree } from './tree';
 
 export type PointGraphEdgeData = { vertices: Point2D[], edges: Edge[], [key: string]: any }
 
@@ -13,7 +14,7 @@ export type FVMeshData = {
 };
 
 /**
- * Wrapper class for mesh face centroids for use in QuadTree lookup
+ * Utility wrapper class for mesh face centroids for use in QuadTree lookup
  * Not using the full face for the lookup since it produces overlapping bounding conditions
  */
 class FVMeshFaceBoundedPoint implements Bounded2D {
@@ -28,20 +29,28 @@ class FVMeshFaceBoundedPoint implements Bounded2D {
     /**
      * This is the bounds that will be used for the QuadTree lookup
      */
-    get bounds() {
+    bounds() {
+
         return new BoundingBox2D([[this._point[0], this._point[1]]]);
     }
 
     /**
      * This is the bounds that will be used for the search filter
      */
-    get faceBounds() {
+    faceBounds() {
 
         const dimx: Vector2D = [this._point[0] - this._point[2] / 2, this._point[0] + this._point[2] / 2];
         const dimy: Vector2D = [this._point[1] - this._point[3] / 2, this._point[1] + this._point[3] / 2];
 
         return BoundingBox2D.fromDimensions(dimx, dimy);
     }
+}
+
+interface FVMeshFaceTriangulation {
+
+    type : 'RING' | 'TRIANGLES'
+
+    indices : Path;
 }
 
 /**
@@ -84,11 +93,23 @@ export class FVMesh implements Bounded2D {
      * @returns whether the operation was successful
      */
     private _addFaceAdjacency(faceIndex1: number, faceIndex2: number) {
+
         if (!this._faces[faceIndex1] || !this._faces[faceIndex2]) {
             return false;
         }
+
         this._faceGraph.addEdge([faceIndex1, faceIndex2]);
+
         return true;
+    }
+
+    /**
+     * 
+     * @NOTE - should probably find a way to not recompute this
+     */
+    private _getFacePolygon(faceIndex : number) : Polygon2D {
+
+        return Polygon2D.fromPath(this._faces[faceIndex], this._vertices);
     }
 
     constructor(meshData: FVMeshData) {
@@ -107,7 +128,24 @@ export class FVMesh implements Bounded2D {
 
     get vertices() { return this._vertices; }
 
-    get bounds() { return this._bounds; }
+    bounds() { 
+        
+        return this._bounds;
+    }
+
+    triangulatedFace(faceIndex : number) {
+        if (!this._faceCentroids[faceIndex]) {
+            return [];
+        } else {
+            return [...this._getFacePolygon(faceIndex).triangulationIndexIterator(this._faces[faceIndex])]
+        }
+    }
+
+    triangulatedFaces() {
+
+        return this._faces.map((face,i) => [...this._getFacePolygon(i).triangulationIndexIterator(face)]);
+    }
+    
 
     /**
      * 
@@ -123,7 +161,7 @@ export class FVMesh implements Bounded2D {
      * @param onFaceSearched utility method for logging status
      */
     findEnclosingFace(point: Point2D, onFaceSearched: (faceIndex: number, searchCount: number) => void = () => { }): number {
-        if (!this.bounds.contains(point)) {
+        if (!this.bounds().contains(point)) {
             return -1;
         }
 
@@ -134,9 +172,8 @@ export class FVMesh implements Bounded2D {
 
             onFaceSearched(facePoint.faceIndex, ++searchCount);
 
-            if (facePoint.faceBounds.contains(point)) {
-                const facePgon = Polygon2D.fromPath(this._faces[facePoint.faceIndex], this._vertices);       
-                return facePgon.contains(point);
+            if (facePoint.faceBounds().contains(point)) {
+                return  this._getFacePolygon(facePoint.faceIndex).contains(point);      
             }
 
             return false;
@@ -188,76 +225,14 @@ export class FVMesh implements Bounded2D {
          * but worst case we need to check nearly every edge for a given vertex 
          * 
          * @Space - O(V + V*E) => O(V*E) 
-         * set of visited vertices + depth of call stack
-         * 
-         * @NOTE - this could probably be optimized to track the current winding of the path while 
-         * the search is happening, so that it can only return paths with a CCW winding.
-         * Right now we need to return the path and then check its winding as a Pgon later 
-         * 
-         * @NOTE - hit the call stack max on large meshes for this one, although it works
-         *  
-         */
-        function findCCWCycleForPathDFSRecursive(path: Path, visited = new Set()): Path | null {
-
-            const startIndex = path[0];
-            const prevIndex = path[path.length - 2];
-            const currIndex = path[path.length - 1];
-
-            if (graph.hasNeighbor(currIndex, startIndex) && path.length > 2) {
-
-                return path;
-
-            } else {
-
-                const startVertex = vertices[prevIndex];
-                const endVertex = vertices[currIndex];
-
-                const currDirection = vectorTwoPoints(startVertex, endVertex);
-                const nextDirections = [];
-
-                for (let index of graph.iterableNeighborIndices(currIndex)) {
-
-                    if (index !== prevIndex && !visited.has(index)) {
-
-                        const nextVertex = vertices[index];
-                        const nextDirection = vectorTwoPoints(endVertex, nextVertex);
-                        const nextAngle = angleTwoVectors(currDirection, nextDirection);
-
-                        nextDirections.push({ index, angle: nextAngle });
-                    }
-                }
-
-                nextDirections.sort((a, b) => b.angle - a.angle);
-
-                for (let v of nextDirections) {
-
-                    visited.add(v.index);
-
-                    const cycle = findCCWCycleForPathDFSRecursive([...path, v.index], visited);
-
-                    if (cycle) {
-                        return cycle;
-                    }
-                }
-
-                return null;
-            }
-        }
-
-        /**
-         * 
-         * DFS method to find the next CCW point to add to an existing path.
-         * @Time - O(V+ElogE)
-         * need to check every edge on every vertex best is O(F) where F is the number of vertices on the face - i.e a grid will only search 3 depths
-         * but worst case we need to check nearly every edge for a given vertex 
-         * 
-         * @Space - O(V + V*E) => O(V*E) 
          * set of visited vertices + size of stack
          * 
          * @NOTE - this could probably be optimized to track the current winding of the path while 
          * the search is happening, so that it can only return paths with a CCW winding.
-         * Right now we need to return the path and then check its winding as a Pgon later 
+         * Right now we need to return the path and then check its winding as a Pgon later .
          * 
+         * The original implementation of this method was recursive,
+         * but I hit the max call stack on larger meshes
          *  
          */
         function findCCWCycleForEdgeDFSStack(edge: Edge): Path | null {
@@ -297,14 +272,13 @@ export class FVMesh implements Bounded2D {
                         }
                     }
 
-                    /**
-                     * @NOTE - we actually want this sorted in the other direction than the recursive version,
-                     * so that the most likely item is first on the stack
-                     */
+                    // sort points ccw
                     nextDirections.sort((a, b) => a.angle - b.angle);
 
+                    visited.add(currIndex);
+
                     for (let v of nextDirections) {
-                        visited.add(v.index);
+
                         paths.push([...path, v.index]);
                     }
                 }
@@ -325,7 +299,7 @@ export class FVMesh implements Bounded2D {
             if (face) {
 
                 const facePgon = Polygon2D.fromPath(face, vertices);
-                const faceBounds = facePgon.bounds;
+                const faceBounds = facePgon.bounds();
 
                 if (facePgon.isClockwise()) continue;
 

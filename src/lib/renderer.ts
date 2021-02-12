@@ -3,20 +3,20 @@ import { Path, Point2D, Vector2D } from "./geometry";
 import { Edge } from "./graph";
 import { FVMesh } from "./mesh";
 
-export type Color4fv = [number, number, number, number ];
+export type Color4fv = [number, number, number, number];
 
-export type Color3fv = [number, number, number ];
+export type Color3fv = [number, number, number];
 
-export function randomColor3fv(){
+export function randomColor3fv() {
 
-    const color : Color3fv = [Math.random(), Math.random(), Math.random()];
+    const color: Color3fv = [Math.random(), Math.random(), Math.random()];
 
     return color;
 }
 
-export function randomColor4fv(){
+export function randomColor4fv() {
 
-    const color : Color3fv = [Math.random(), Math.random(), Math.random()];
+    const color: Color3fv = [Math.random(), Math.random(), Math.random()];
 
     return color;
 }
@@ -70,9 +70,10 @@ export class WebGLCanvasFVMeshRenderer {
 
     private _mesh: FVMesh | null = null;
     private _meshFaceColors: Color3fv[] = [];
+    private _meshFaceTriangleIndices : number[][][] = [];
     private _meshVBO: WebGLBuffer | null = null;
     private _meshIBO: WebGLBuffer | null = null;
-    private _meshMouseMoveCallback : (meshPoint : Point2D, mouseEvent : MouseEvent) => void = () => {}
+    private _meshMouseMoveCallback: (meshPoint: Point2D, mouseEvent: MouseEvent) => void = () => { }
 
     private get _gl() { return this._canvas.getContext('webgl') }
 
@@ -119,14 +120,18 @@ export class WebGLCanvasFVMeshRenderer {
         gl.enableVertexAttribArray(vertPosition);
     }
 
-    private _renderFaces(faces: Path[], colors: Color3fv[] = []) {
+    private _flatMap(numberArr: number[][]) {
+        return numberArr.reduce((buffer, arr) => { buffer.push(...arr); return buffer }, [] as number[]);
+    }
+
+    private _renderTriangles(triangleIndices: number[][][], colors: Color3fv[] = []) {
 
         if (!this._program || !this._gl) return;
 
         const gl = this._gl;
 
         this._meshIBO = this._meshIBO || gl.createBuffer();
-        const iboBuffer = faces.reduce((buffer, face) => { buffer.push(...face); return buffer }, [] as number[]);
+        const iboBuffer = triangleIndices.reduce((buffer, triangleIndexArr) => { buffer.push(...this._flatMap(triangleIndexArr)); return buffer }, [] as number[]);
 
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this._meshIBO);
         gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(iboBuffer), gl.STATIC_DRAW);
@@ -135,19 +140,23 @@ export class WebGLCanvasFVMeshRenderer {
 
         let offset = 0;
 
-        for (let i = 0; i < faces.length; i++) {
+        for (let i = 0; i < triangleIndices.length; i++) {
 
-            const face = faces[i];
+            const triangles = triangleIndices[i];
             const color = colors[i];
 
             gl.uniform3fv(vColor, color);
-            gl.drawElements(gl.TRIANGLE_FAN, face.length, gl.UNSIGNED_SHORT, offset * Int16Array.BYTES_PER_ELEMENT);             //using triangle fan here since i'm only rendering convex polygons
 
-            offset += face.length;
+            for (let j = 0; j < triangles.length; j++) {
+
+                gl.drawElements(gl.TRIANGLES, 3, gl.UNSIGNED_SHORT, offset * Int16Array.BYTES_PER_ELEMENT);
+
+                offset += 3;
+            }
         }
     }
 
-    private _renderFaceEdges(faces: Path[]) {
+    private _renderFaceEdges(faces: number[][]) {
 
         if (!this._program || !this._gl) return;
 
@@ -167,14 +176,14 @@ export class WebGLCanvasFVMeshRenderer {
 
             const face = faces[i];
 
-            gl.uniform3fv(vColor, [1,1,1]);
-            gl.drawElements(gl.LINE_LOOP, face.length, gl.UNSIGNED_SHORT, offset * Int16Array.BYTES_PER_ELEMENT);  
+            gl.uniform3fv(vColor, [1, 1, 1]);
+            gl.drawElements(gl.LINE_LOOP, face.length, gl.UNSIGNED_SHORT, offset * Int16Array.BYTES_PER_ELEMENT);
 
             offset += face.length;
         }
     }
 
-    private _renderEdges(edges : Edge[]) {
+    private _renderEdges(edges: Edge[]) {
 
         if (!this._program || !this._gl) return;
 
@@ -187,8 +196,8 @@ export class WebGLCanvasFVMeshRenderer {
         gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(iboBuffer), gl.STATIC_DRAW);
 
         const vColor = gl.getUniformLocation(this._program, 'vColor');
-        gl.uniform3fv(vColor, [0.4,0.4,0.4]);
-        
+        gl.uniform3fv(vColor, [0.4, 0.4, 0.4]);
+
         for (let i = 0; i < edges.length; i++) {
             gl.drawElements(gl.LINES, 2, gl.UNSIGNED_SHORT, 2 * i * Int16Array.BYTES_PER_ELEMENT);             //using triangle fan here since i'm only rendering convex polygons
         }
@@ -283,7 +292,7 @@ export class WebGLCanvasFVMeshRenderer {
                 const modelX = projectionX / scale - tx;
                 const modelY = projectionY / scale - ty;
 
-                const modelPoint : Vector2D = [modelX, modelY];
+                const modelPoint: Vector2D = [modelX, modelY];
 
                 this._meshMouseMoveCallback(modelPoint, ev);
             }
@@ -294,11 +303,11 @@ export class WebGLCanvasFVMeshRenderer {
 
         if (!this._mesh) return;
 
-        const face = this._mesh.faces[meshFaceIndex];
+        const face = this._mesh.triangulatedFace(meshFaceIndex);
         const color = meshFaceColor || this._meshFaceColors[meshFaceIndex];
 
         if (face && color) {
-            this._renderFaces([face], [color]);
+            this._renderTriangles([face], [color]);
         }
     }
 
@@ -307,7 +316,7 @@ export class WebGLCanvasFVMeshRenderer {
         if (!this._mesh) return;
 
         this._meshFaceColors = meshFaceColors;
-        this._renderFaces(this._mesh.faces, this._meshFaceColors)
+        this._renderTriangles(this._meshFaceTriangleIndices, this._meshFaceColors)
     }
 
     renderMeshLines() {
@@ -317,9 +326,9 @@ export class WebGLCanvasFVMeshRenderer {
         this._renderFaceEdges(this._mesh.faces)
     }
 
-    renderEdges(edges : Edge[]) {
+    renderEdges(edges: Edge[]) {
 
-        if (!this._mesh ) return;
+        if (!this._mesh) return;
 
         this._renderEdges(edges);
     }
@@ -327,6 +336,7 @@ export class WebGLCanvasFVMeshRenderer {
     setMesh(mesh: FVMesh) {
 
         this._mesh = mesh;
+        this._meshFaceTriangleIndices = [...this._mesh.triangulatedFaces()];
 
         this._setVertices(mesh.vertices);
         this._updateModelMatrix();
@@ -342,8 +352,8 @@ export class WebGLCanvasFVMeshRenderer {
         gl.clear(gl.COLOR_BUFFER_BIT | this._gl.DEPTH_BUFFER_BIT);
     }
 
-    onMeshMouseMove(callback : (modelPoint : Point2D, mouseEvent : MouseEvent ) => void) {
-        
+    onMeshMouseMove(callback: (modelPoint: Point2D, mouseEvent: MouseEvent) => void) {
+
         this._meshMouseMoveCallback = callback;
     }
 
@@ -373,7 +383,7 @@ export class WebGLCanvasFVMeshRenderer {
 
     static scaleAndCenterTransformationMatrix(boundedObject: Bounded2D) {
 
-        const bbox = boundedObject.bounds;
+        const bbox = boundedObject.bounds();
         const origin = bbox.origin;
 
         const dx = bbox.dx;
