@@ -9,16 +9,16 @@
 <body>
     <canvas id='view'></canvas>
     <div id='menu'>
-        <button type="file" id='graph'>load graph</button>
-        <button type="file" id='mesh' disabled>load mesh</button> 
+        <button id='graph'>load graph</button>
+        <button id='mesh' disabled>load mesh</button>
+        <button id='save' disabled>save mesh</button> 
     </div>
     <div id='log'></div>
     <div id='tooltip'></div>
     <div id='options'>
-        <button id='cache'>cache mesh [faster]</button>
-        <button id='save'>save mesh</button>
+        <button id='cache' disabled>cache mesh [faster]</button>
     </div>
     <input id='fileid' type='file' hidden  accept=".json"/>
-    <script src="index.js"></script>
+    <script src="index.js?version=1""></script>
 </body>
 </html>

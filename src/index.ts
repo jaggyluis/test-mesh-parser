@@ -32,20 +32,6 @@ import { Graph } from './lib/graph';
         log.innerHTML += `<br>${str}`
     }
 
-    // switch between running point intersection algorithm on raw mesh data JSON object 
-    // (i.e. rebuild the mesh on every mouse move ) vs cached mesh class 
-    const button = document.getElementById('cache') as HTMLButtonElement;
-    button.addEventListener("click", () => {
-        cache = !cache;
-        if (!cache) {
-            button.innerText = 'cache mesh [faster]';
-            button.classList.remove('selected');
-        } else {
-            button.innerText = 'mesh cached [click to rebuild dynamically]';
-            button.classList.add('selected');
-        }
-    });
-
     // graph selection 
     const menu = document.getElementById('menu') as HTMLDivElement;
     const menuItems: HTMLElement[] = [];
@@ -77,8 +63,9 @@ import { Graph } from './lib/graph';
                     case 'graph': {
                         try {
                             const data: PointGraphEdgeData = validatePointGraphData(JSON.parse(str));
-                            createMenuItem(data, name);
+                            const item = createMenuItem(data, name);
                             console.log(`created data for ${file.name}`);
+                            item.click();
                         } catch (error) {
                             alert(`Could not parse graph from ${file.name}\nReason : ${error.message}`)
                         }
@@ -121,7 +108,22 @@ import { Graph } from './lib/graph';
         a.download = `${saveMeshName || 'mesh'}.json`;
         a.href = URL.createObjectURL(file);
         a.click();
-    })
+    });
+
+    // switch between running point intersection algorithm on raw mesh data JSON object 
+    // (i.e. rebuild the mesh on every mouse move ) vs cached mesh class 
+    const cacheMesh = document.getElementById('cache') as HTMLButtonElement;
+    cacheMesh.addEventListener("click", () => {
+        cache = !cache;
+        if (!cache) {
+            cacheMesh.innerText = 'cache mesh [faster]';
+            cacheMesh.classList.remove('selected');
+        } else {
+            cacheMesh.innerText = 'mesh cached [click to disable]';
+            cacheMesh.classList.add('selected');
+        }
+    });
+
 
     /**
      * Add a new Data to the list
@@ -136,6 +138,9 @@ import { Graph } from './lib/graph';
 
         // select a new graph for viewing and analysis
         menuItem.addEventListener('click', () => {
+
+            saveMesh.disabled = false;
+            cacheMesh.disabled = false;
 
             menuItem.classList.add('selected');
             menuItems.forEach(other => {
@@ -228,6 +233,8 @@ import { Graph } from './lib/graph';
 
         menuItems.push(menuItem);
         menu.appendChild(menuItem);
+
+        return menuItem;
     }
 
     // **************** ALGORITHMS ****************
