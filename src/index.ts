@@ -2,13 +2,17 @@
 import { FVMesh, FVMeshData, PointGraphEdgeData } from './lib/mesh';
 import { WebGLCanvasFVMeshRenderer, Color3fv, randomColor3fv } from './lib/renderer';
 
-import { data } from './data/data';
+import { data, validatePointGraphData } from './data/data';
 import { Point2D } from './lib/geometry';
 import { Graph } from './lib/graph';
 
+/**
+ * Main application method - needs a lot of cleanup
+ */
 (() => {
 
     let cache = false;
+    let curr: FVMeshData | null = null;
 
     // show active face index
     const tooltip = document.getElementById('tooltip') as HTMLDivElement;
@@ -28,7 +32,8 @@ import { Graph } from './lib/graph';
         log.innerHTML += `<br>${str}`
     }
 
-    // switch between running point intersection algorythm from raw data vs cached mesh class 
+    // switch between running point intersection algorithm on raw mesh data JSON object 
+    // (i.e. rebuild the mesh on every mouse move ) vs cached mesh class 
     const button = document.getElementById('cache') as HTMLButtonElement;
     button.addEventListener("click", () => {
         cache = !cache;
@@ -45,12 +50,89 @@ import { Graph } from './lib/graph';
     const menu = document.getElementById('menu') as HTMLDivElement;
     const menuItems: HTMLElement[] = [];
 
+    // load default test cases
     data.forEach((t, i) => {
+        createMenuItem(data[i], i)
+    });
 
+    // file uploads
+    const loader = document.getElementById('fileid') as HTMLInputElement;
+    let loadType: 'graph' | 'mesh' | null = null;
+    loader.addEventListener('change', (ev) => {
+
+        if (!loadType) return;
+
+        const input = ev.target as HTMLInputElement;
+        const files = input.files;
+        const file = files ? files[0] : null;
+        if (file) {
+            const reader = new FileReader();
+            const info = file.name.split('.');
+            info.pop()
+            const name = info.join();
+            reader.onload = (e) => {
+                const target: any = e.target;
+                const str = target.result;
+                switch (loadType) {
+                    case 'graph': {
+                        try {
+                            const data: PointGraphEdgeData = validatePointGraphData(JSON.parse(str));
+                            createMenuItem(data, name);
+                            console.log(`created data for ${file.name}`);
+                        } catch (error) {
+                            alert(`Could not parse graph from ${file.name}\nReason : ${error.message}`)
+                        }
+                        break;
+                    }
+                    case 'mesh': {
+                        alert('not implemented');
+                        break;
+                    }
+                    default: {
+                        console.error(`invalid load type ${loadType}`)
+                    }
+                }
+                // clear the input data 
+                (input as any).value = null; // dirty, dirty...
+                loadType = null;
+            };
+            reader.readAsText(file);
+        }
+    });
+    const loadGraph = document.getElementById('graph') as HTMLButtonElement;
+    loadGraph.addEventListener('click', () => {
+        loadType = 'graph';
+        loader.click();
+    });
+    const loadMesh = document.getElementById('mesh') as HTMLButtonElement;
+    loadMesh.addEventListener('click', () => {
+        loadType = 'mesh';
+        loader.click();
+    });
+
+    // save mesh to file
+    const saveMesh = document.getElementById('save') as HTMLButtonElement;
+    let saveMeshData : FVMeshData | null = null;
+    let saveMeshName : string | null = null;
+    saveMesh.addEventListener('click', () => {
+        if (!saveMeshData) return;
+        const a = document.createElement("a");
+        var file = new Blob([JSON.stringify(saveMeshData)], {type: 'text/plain'});
+        a.download = `${saveMeshName || 'mesh'}.json`;
+        a.href = URL.createObjectURL(file);
+        a.click();
+    })
+
+    /**
+     * Add a new Data to the list
+     * @param data data to be added to menu
+     * @param id id of data - just for label
+     */
+    function createMenuItem(data: PointGraphEdgeData, id: string | number) {
         const menuItem = document.createElement('div');
         menuItem.className = 'menu-item'
-        menuItem.innerText = t.name ? `${t.name }`: `graph ${i}`;
-        menuItem.innerText += `: [E=${t.edges.length}, V=${t.vertices.length}]`;
+        menuItem.innerText = data.name ? `${data.name}` : `graph ${id}`;
+        menuItem.innerText += `: [E=${data.edges.length}, V=${data.vertices.length}]`;
 
         // select a new graph for viewing and analysis
         menuItem.addEventListener('click', () => {
@@ -65,11 +147,19 @@ import { Graph } from './lib/graph';
                 }
             });
 
-            let meshData = runA1(data[i]);
+            /**
+             * @TODO - these should be application globals
+             * and not sit inside the handler
+             */
+            let meshData = runA1(data);
             let meshFaceColors = meshData.faces.map(f => randomColor3fv());
             let meshFaceColorsStatic = [...meshFaceColors]; // only adding this to save the original colors
             let mesh = new FVMesh(meshData);
             let meshFaceIndex = -1;
+
+            // need to assign these here because I haven't moved the above to globals...
+            saveMeshData = meshData;
+            saveMeshName = data.name ? `${data.name}_mesh` : `mesh ${id}`;
 
             // console.log(JSON.stringify(meshData));
 
@@ -78,8 +168,8 @@ import { Graph } from './lib/graph';
                 renderer.setMesh(mesh);
                 renderer.renderMeshFill(meshFaceColors);
 
-                if (t.edges.length < 10000) renderer.renderEdges(t.edges); // hard to see colors on large meshes when edges are rendered
-                if (t.edges.length < 10000) renderer.renderMeshLines(); // hard to see colors on large meshes when edges are rendered
+                if (data.edges.length < 10000) renderer.renderEdges(data.edges); // hard to see colors on large meshes when edges are rendered
+                if (data.edges.length < 10000) renderer.renderMeshLines(); // hard to see colors on large meshes when edges are rendered
 
                 renderer.onMeshMouseMove((point, mouseEvent) => { // this method will return the mouse cursor remapped to the active mesh coordinate system
 
@@ -105,13 +195,13 @@ import { Graph } from './lib/graph';
                             renderer.renderMeshFace(faceIndex, [1, 1, 1]);
                             meshFaceAdjacencies.forEach(j => renderer.renderMeshFace(j, [0, 0, 0]));
 
-                            if (t.edges.length < 10000) renderer.renderEdges(t.edges); // hard to see colors on large meshes when edges are rendered
-                            if (t.edges.length < 10000) renderer.renderMeshLines(); // hard to see colors on large meshes when edges are rendered
+                            if (data.edges.length < 10000) renderer.renderEdges(data.edges); // hard to see colors on large meshes when edges are rendered
+                            if (data.edges.length < 10000) renderer.renderMeshLines(); // hard to see colors on large meshes when edges are rendered
                         }
 
                         tooltip.classList.add('active');
 
-                    // the new face is the same....
+                        // the new face is the same....
                     } else if (faceIndex === -1 && meshFaceIndex !== -1) {
 
                         meshFaceColors = meshData.faces.map(f => randomColor3fv());
@@ -119,8 +209,8 @@ import { Graph } from './lib/graph';
                         renderer.clear();
                         renderer.renderMeshFill(meshFaceColors);
 
-                        if (t.edges.length < 10000) renderer.renderEdges(t.edges); // hard to see colors on large meshes when edges are rendered
-                        if (t.edges.length < 10000) renderer.renderMeshLines(); // hard to see colors on large meshes when edges are rendered
+                        if (data.edges.length < 10000) renderer.renderEdges(data.edges); // hard to see colors on large meshes when edges are rendered
+                        if (data.edges.length < 10000) renderer.renderMeshLines(); // hard to see colors on large meshes when edges are rendered
 
                         tooltip.classList.remove('active');
                         tooltip.innerHTML = '';
@@ -128,18 +218,17 @@ import { Graph } from './lib/graph';
 
                     // update the tooltip with the new faceId
                     tooltip.innerText = `${faceIndex}`;
-                    tooltip.style.top = `${mouseEvent.clientY-30}px`;
+                    tooltip.style.top = `${mouseEvent.clientY - 30}px`;
                     tooltip.style.left = `${mouseEvent.clientX}px`;
 
                     meshFaceIndex = faceIndex;
                 })
             }
-         });
+        });
 
         menuItems.push(menuItem);
         menu.appendChild(menuItem);
-    });
-
+    }
 
     // **************** ALGORITHMS ****************
 
@@ -180,7 +269,7 @@ import { Graph } from './lib/graph';
         const result = new FVMesh(data).findEnclosingFace(point, (faceIndex, searchCount) => {
             logToScreen(`calc A3 search at I=${faceIndex}, searched ${searchCount}`);
         });
-        if (result !== -1)  logToScreen(`calc A3 [I=${result}] took ${Date.now() - now}ms`);
+        if (result !== -1) logToScreen(`calc A3 [I=${result}] took ${Date.now() - now}ms`);
         return result;
     }
 

@@ -8,10 +8,17 @@
 </head>
 <body>
     <canvas id='view'></canvas>
-    <div id='menu'></div>
+    <div id='menu'>
+        <button type="file" id='graph'>load graph</button>
+        <button type="file" id='mesh' disabled>load mesh</button> 
+    </div>
     <div id='log'></div>
     <div id='tooltip'></div>
-    <button id='cache'>cache mesh [faster]</button>
+    <div id='options'>
+        <button id='cache'>cache mesh [faster]</button>
+        <button id='save'>save mesh</button>
+    </div>
+    <input id='fileid' type='file' hidden  accept=".json"/>
     <script src="index.js"></script>
 </body>
 </html>

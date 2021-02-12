@@ -55,7 +55,7 @@ html, body, canvas {
 }
 
 .menu-item.selected {
-    color: white;
+    color: cyan;
 }
 
 .menu-item:hover {
@@ -71,12 +71,15 @@ html, body, canvas {
     pointer-events: none;
 }
 
-button {
-    font-family: monospace;
+#options {
     position: absolute;
     top: 0;
     right : 0;
     z-index: 3;
+}
+
+button {
+    font-family: monospace;
     margin: 10px;
     background: transparent;
     color: white;
@@ -87,8 +90,17 @@ button {
     font-size: 1em;
 }
 
+button:hover {
+    color:lightblue;
+    border-color: lightblue;
+}
+
 button.selected {
     color: cyan;
     border: 2px solid cyan;
     padding: 10px;
+}
+
+button:disabled {
+    opacity: 0.3;
 }

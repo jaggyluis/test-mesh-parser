@@ -3,6 +3,35 @@ import { Point2D } from "../lib/geometry";
 import { Edge } from "../lib/graph";
 import { PointGraphEdgeData } from "../lib/mesh"
 
+/**
+ * Sanitize input data from client
+ * @param data 
+ */
+export function validatePointGraphData(data : PointGraphEdgeData) {
+    
+    if (!data.edges || !Array.isArray(data.edges)) {
+        throw new Error(`invalid PointGraphData edges. should be [number, number][], but got ${data.edges}`)
+    } else {
+        data.edges.forEach(edge => {
+            if (!Array.isArray(edge) || edge.length !== 2 || typeof edge[0] !== 'number' || typeof edge[1] !== 'number') {
+                throw new Error(`invalid PointGraphData edge. should be [number, number], but got ${edge}`);
+            }
+        })
+    }
+
+    if (!data.vertices || !Array.isArray(data.vertices)) {
+        throw new Error(`invalid PointGraphData vertices. should be [number, number][], but got ${data.vertices}`)
+    } else {
+        data.vertices.forEach(vertex => {
+            if (!Array.isArray(vertex) || vertex.length !== 2 || typeof vertex[0] !== 'number' || typeof vertex[1] !== 'number') {
+                throw new Error(`invalid PointGraphData vertex. should be [number, number], but got ${vertex}`);
+            }
+        })
+    }
+
+    return data;
+}
+
 export const data: PointGraphEdgeData[] = [
 
     /**
@@ -117,7 +146,7 @@ export const data: PointGraphEdgeData[] = [
     {
         "vertices": [[0, 0], [2, 0], [2, 2], [0, 2], [4, 0]],
         "edges": [[0, 1], [0, 2], [0, 3], [2, 3], [1, 4], [2, 4]],
-        "name": "quad with flat edge + triangle",
+        "name": "flat edge quad + triangle",
         "__faces": [
             '0-1-2-4',
             '0-2-3'
