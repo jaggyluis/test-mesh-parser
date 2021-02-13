@@ -161,7 +161,7 @@ export class FVMesh implements Bounded2D {
         const bbox = new BoundingBox2D([point]);
 
         let searchCount = 0;
-        const search = this._faceLookupTree.search(bbox, (facePoint: FVMeshFaceBoundedPoint, faceNode: QuadTree<FVMeshFaceBoundedPoint>) => {
+        const search : FVMeshFaceBoundedPoint | null = this._faceLookupTree.search(bbox, (facePoint: FVMeshFaceBoundedPoint, faceNode: QuadTree<FVMeshFaceBoundedPoint>) => {
 
             onFaceSearched(facePoint.faceIndex, ++searchCount);
 
