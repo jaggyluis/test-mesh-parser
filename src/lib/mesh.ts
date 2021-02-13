@@ -46,13 +46,6 @@ class FVMeshFaceBoundedPoint implements Bounded2D {
     }
 }
 
-interface FVMeshFaceTriangulation {
-
-    type : 'RING' | 'TRIANGLES'
-
-    indices : Path;
-}
-
 /**
  * Main Mesh class - this class is mainly a dual graph for the point graph that generates it
  * It used to extend Graph, but that wasn't super clean so I moved the dual graph into a class property as _faceGraph
