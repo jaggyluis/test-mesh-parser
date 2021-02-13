@@ -227,7 +227,7 @@ function findEars(polygon : Polygon2D) : Point2D[] {
         let h = i === 0 ? polygon.points.length -1 : i - 1;
         let j = (i + 1) % polygon.points.length;
         // test if the point at i is an ear
-        if (isEar(polygon.points[h], polygon.points[i], polygon.points[j], polygon.points)) {
+        if (isEar([polygon.points[h], polygon.points[i], polygon.points[j]], polygon.points)) {
             ears.push(p);
         }
     }
@@ -269,7 +269,7 @@ function* earclip(polygon: Polygon2D): Generator<Triangle> {
             ];
 
             for (let group of ps ) {
-                if (isEar(group[0], group[1], group[2], points)) { // a new ear has appeared!
+                if (isEar([group[0], group[1], group[2]], points)) { // a new ear has appeared!
                     if (!ears.includes(group[1])) { // double check that this ear isnt in actually an old one... 
                         ears.push(group[1])
                     }
@@ -316,7 +316,7 @@ function* earclipIndices(polygon : Polygon2D, indices : number[]) : Generator<nu
             ];
 
             for (let group of ps ) {
-                if (isEar(group[0], group[1], group[2], points)) { // a new ear has appeared!
+                if (isEar([group[0], group[1], group[2]], points)) { // a new ear has appeared!
                     if (!ears.includes(group[1])) { // double check that this ear isnt in actually an old one... 
                         ears.push(group[1])
                     }
@@ -332,9 +332,9 @@ function* earclipIndices(polygon : Polygon2D, indices : number[]) : Generator<nu
     }
 }
 
-function isEar(prevPoint : Point2D, currPoint : Point2D, nextPoint : Point2D, points : Point2D[]) {
+function isEar(triangle : Triangle, points : Point2D[]) {
     
-    const trianglePolygon = new Polygon2D([prevPoint, currPoint, nextPoint]);
+    const trianglePolygon = new Polygon2D(triangle);
 
     if (trianglePolygon.isClockwise() || !trianglePolygon.area ) {
         return false;

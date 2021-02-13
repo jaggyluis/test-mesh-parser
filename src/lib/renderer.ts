@@ -272,6 +272,7 @@ export class WebGLCanvasFVMeshRenderer {
             this._updateProjectionMatrix();
             this.clear()
             this.renderMeshFill(this._meshFaceColors);
+            this.renderMeshLines();
         })
 
         this._canvas.addEventListener('mousemove', ev => {
