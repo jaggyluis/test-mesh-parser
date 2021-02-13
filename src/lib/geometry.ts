@@ -94,14 +94,7 @@ export class Polygon2D implements Bounded2D {
 
     /**
      * This is not a great solution for point containment, but works for now 
-     *
-     * @NOTE - this is the big missing piece here for containment checks 
-     * @TODO - needs to be implemented
-     * 
-     * The implementation of this will also resolve the meshing issues on the renderer side -
-     * cannot currently mesh convex pgons correctly
      */
-
     contains(point: Point2D) {
         if (!this._bounds.contains(point)) {
             return false;

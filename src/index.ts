@@ -286,7 +286,7 @@ import { Graph } from './lib/graph';
      * 
      * H - Height of QuadTree
      * N - max number of elements per bucket
-     * Fv - Vertex count for face @NOTE - once implemented - right now this is substituting a bounds2d check
+     * Fv - Vertex count for face
      * 
      * worst - (O(F*Fv) - search every face and compute polygon for every face 
      * average ( O(H *(N * Fv)) )

@@ -126,7 +126,7 @@ export class FVMesh implements Bounded2D {
         return this._bounds;
     }
 
-    triangulatedFace(faceIndex : number) {
+    triangulatedFace(faceIndex : number) : number[][] {
         if (!this._faceCentroids[faceIndex]) {
             return [];
         } else {
@@ -134,9 +134,9 @@ export class FVMesh implements Bounded2D {
         }
     }
 
-    triangulatedFaces() {
+    triangulatedFaces() : number[][][] {
 
-        return this._faces.map((face,i) => [...this._getFacePolygon(i).triangulationIndexIterator(face)]);
+        return this._faces.map((face,i) => this.triangulatedFace(i));
     }
     
 
