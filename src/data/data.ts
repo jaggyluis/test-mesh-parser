@@ -3,35 +3,6 @@ import { Point2D } from "../lib/geometry";
 import { Edge } from "../lib/graph";
 import { PointGraphEdgeData } from "../lib/mesh"
 
-/**
- * Sanitize input data from client
- * @param data 
- */
-export function validatePointGraphData(data : PointGraphEdgeData) {
-    
-    if (!data.edges || !Array.isArray(data.edges)) {
-        throw new Error(`invalid PointGraphData edges. should be [number, number][], but got ${data.edges}`)
-    } else {
-        data.edges.forEach(edge => {
-            if (!Array.isArray(edge) || edge.length !== 2 || typeof edge[0] !== 'number' || typeof edge[1] !== 'number') {
-                throw new Error(`invalid PointGraphData edge. should be [number, number], but got ${edge}`);
-            }
-        })
-    }
-
-    if (!data.vertices || !Array.isArray(data.vertices)) {
-        throw new Error(`invalid PointGraphData vertices. should be [number, number][], but got ${data.vertices}`)
-    } else {
-        data.vertices.forEach(vertex => {
-            if (!Array.isArray(vertex) || vertex.length !== 2 || typeof vertex[0] !== 'number' || typeof vertex[1] !== 'number') {
-                throw new Error(`invalid PointGraphData vertex. should be [number, number], but got ${vertex}`);
-            }
-        })
-    }
-
-    return data;
-}
-
 export const data: PointGraphEdgeData[] = [
 
     /**
@@ -368,18 +339,49 @@ export const data: PointGraphEdgeData[] = [
         "__facePoints" : [
             [3,1,-1],
             [0.5, 0.5, 0],
-            [15, 0.1, 0]
+            [15, -1.8, 0]
         ]
     },
 
     createGrid(10, 10, 1, 'grid [small]'),
     createGrid(100, 100, 0.4, 'grid [medium]'),
-    createGrid(200, 200, 1, 'grid [stress]'),
+    createGrid(200, 200, 1, 'grid [stress] - slow'),
     createWeirdoGrid(8, 8, 1, 0, 'weirdo grid edge lenth 1'),
     createWeirdoGrid(30, 30, 100, 0, 'weirdo grid edge length 100'),
     createWeirdoGrid(8, 8, 1, 0.2, 'random remove [small]'),
     createWeirdoGrid(30, 30, 100, 0.3, 'random remove [medium]'),
-]
+    // createWeirdoGrid(100, 100, 0.01, 0.3, 'random remove [stress] - slow'),
+];
+
+
+/**
+ * Sanitize input data from client
+ * @param data 
+ */
+export function validatePointGraphData(data : PointGraphEdgeData) {
+    
+    if (!data.edges || !Array.isArray(data.edges)) {
+        throw new Error(`invalid PointGraphData edges. should be [number, number][], but got ${data.edges}`)
+    } else {
+        data.edges.forEach(edge => {
+            if (!Array.isArray(edge) || edge.length !== 2 || typeof edge[0] !== 'number' || typeof edge[1] !== 'number') {
+                throw new Error(`invalid PointGraphData edge. should be [number, number], but got ${edge}`);
+            }
+        })
+    }
+
+    if (!data.vertices || !Array.isArray(data.vertices)) {
+        throw new Error(`invalid PointGraphData vertices. should be [number, number][], but got ${data.vertices}`)
+    } else {
+        data.vertices.forEach(vertex => {
+            if (!Array.isArray(vertex) || vertex.length !== 2 || typeof vertex[0] !== 'number' || typeof vertex[1] !== 'number') {
+                throw new Error(`invalid PointGraphData vertex. should be [number, number], but got ${vertex}`);
+            }
+        })
+    }
+
+    return data;
+}
 
 function createGrid(dimx: number, dimy: number, dist: number, name: string = 'grid'): PointGraphEdgeData {
 

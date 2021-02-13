@@ -94,6 +94,10 @@ npm run start
 ```
 This will run a live reload version to http://localhost:8080/build/ by default.
 
+This will load the app with all the tests as default, but additional data can be loaded in using the "load graph" button in the top left, and results can be saved using the "save mesh" button on the top right.
+
+
+
 ### Building the Application
 ```
 npm run build
@@ -101,18 +105,13 @@ npm run build
 
 ## TODO
 
-- optimize triangulation and bounding checks for polygons - right now it's using a pretty primitive implementation
+- optimize triangulation and bounding checks for polygons
 
-- implement triangulation and bounding checks for non convex polygons
-
-- implement rendering for non convex polygons :
-	- right now it is treating all polygons as convex for rendering which produces incorrect visuals
+- implement more testing data for edge cases
 
 - implement testing for :
     - adjacency layers
 
-- implement more testing data for edge cases
+- loading previously computed mesh data into UI
 
-- loading previously computed mesh data
-
-- lots of optimizations can still be made to the general algorithms 
+- lots of optimizations 

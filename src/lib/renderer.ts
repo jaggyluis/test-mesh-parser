@@ -21,6 +21,7 @@ export function randomColor4fv() {
     return color;
 }
 
+
 export class WebGLCanvasFVMeshRenderer {
 
 
@@ -77,6 +78,10 @@ export class WebGLCanvasFVMeshRenderer {
 
     private get _gl() { return this._canvas.getContext('webgl') }
 
+    private _mapIndicesToBuffer(indices: number[][]) {
+        return indices.reduce((buffer, arr) => { buffer.push(...arr); return buffer }, [] as number[]);
+    }
+    
     private _updateProjectionMatrix() {
 
         if (!this._program || !this._gl) return;
@@ -108,7 +113,7 @@ export class WebGLCanvasFVMeshRenderer {
         const gl = this._gl;
 
         this._meshVBO = this._meshVBO || gl.createBuffer();
-        const vboBuffer = vertices.reduce((buffer, vertex) => { buffer.push(...vertex); return buffer }, [] as number[]);
+        const vboBuffer = this._mapIndicesToBuffer(vertices); 
 
         gl.bindBuffer(gl.ARRAY_BUFFER, this._meshVBO);
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vboBuffer), gl.STATIC_DRAW);
@@ -120,9 +125,6 @@ export class WebGLCanvasFVMeshRenderer {
         gl.enableVertexAttribArray(vertPosition);
     }
 
-    private _flatMap(numberArr: number[][]) {
-        return numberArr.reduce((buffer, arr) => { buffer.push(...arr); return buffer }, [] as number[]);
-    }
 
     private _renderTriangles(triangleIndices: number[][][], colors: Color3fv[] = []) {
 
@@ -131,7 +133,7 @@ export class WebGLCanvasFVMeshRenderer {
         const gl = this._gl;
 
         this._meshIBO = this._meshIBO || gl.createBuffer();
-        const iboBuffer = triangleIndices.reduce((buffer, triangleIndexArr) => { buffer.push(...this._flatMap(triangleIndexArr)); return buffer }, [] as number[]);
+        const iboBuffer = this._mapIndicesToBuffer(triangleIndices.map(triangleIndexArray => this._mapIndicesToBuffer(triangleIndexArray)));
 
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this._meshIBO);
         gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(iboBuffer), gl.STATIC_DRAW);
@@ -148,9 +150,7 @@ export class WebGLCanvasFVMeshRenderer {
             gl.uniform3fv(vColor, color);
 
             for (let j = 0; j < triangles.length; j++) {
-
                 gl.drawElements(gl.TRIANGLES, 3, gl.UNSIGNED_SHORT, offset * Int16Array.BYTES_PER_ELEMENT);
-
                 offset += 3;
             }
         }
@@ -163,7 +163,7 @@ export class WebGLCanvasFVMeshRenderer {
         const gl = this._gl;
 
         this._meshIBO = this._meshIBO || gl.createBuffer();
-        const iboBuffer = faces.reduce((buffer, face) => { buffer.push(...face); return buffer }, [] as number[]);
+        const iboBuffer = this._mapIndicesToBuffer(faces); 
 
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this._meshIBO);
         gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(iboBuffer), gl.STATIC_DRAW);
@@ -190,7 +190,7 @@ export class WebGLCanvasFVMeshRenderer {
         const gl = this._gl;
 
         this._meshIBO = this._meshIBO || gl.createBuffer();
-        const iboBuffer = edges.reduce((buffer, edge) => { buffer.push(...edge); return buffer }, [] as number[]);
+        const iboBuffer = this._mapIndicesToBuffer(edges);
 
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this._meshIBO);
         gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(iboBuffer), gl.STATIC_DRAW);
