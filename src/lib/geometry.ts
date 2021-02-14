@@ -131,8 +131,8 @@ export class Polygon2D implements Bounded2D {
                 yield indexArray;
             }
         } else {
-            for (let triangle of earclipIndices(this, indices)) {
-                yield triangle;
+            for (let indexArray of earclipIndices(this, indices)) {
+                yield indexArray;
             }
         }
     }
