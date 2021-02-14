@@ -244,9 +244,9 @@ import { Graph } from './lib/graph';
      * @Space O(E + V)
      */
     function runA1(data: PointGraphEdgeData): FVMeshData {
-        const now = Date.now();
+        const now = performance.now();
         const result = FVMesh.fromPointGraphEdgeData(data).toJSON();
-        logToScreen(`calc A1 [F=${result.faces.length}] took ${Date.now() - now}ms`);
+        logToScreen(`calc A1 [F=${result.faces.length}] took ${performance.now() - now}ms`);
         return result;
     }
 
@@ -256,9 +256,9 @@ import { Graph } from './lib/graph';
      * 
      */
     function runA2(data: FVMeshData, faceIndex: number): number[] {
-        const now = Date.now();
+        const now = performance.now();
         const result = data.faceAdjacencies[faceIndex] || [];
-        logToScreen(`calc A2 [F=${result.length}] took ${Date.now() - now}ms`);
+        logToScreen(`calc A2 [F=${result.length}] took ${performance.now() - now}ms`);
         return result;
     }
 
@@ -272,11 +272,11 @@ import { Graph } from './lib/graph';
      * 
      */
     function runA3(data: FVMeshData, point: Point2D) {
-        const now = Date.now();
+        const now = performance.now();
         const result = new FVMesh(data).findEnclosingFace(point, (faceIndex, searchCount) => {
             logToScreen(`calc A3 search at I=${faceIndex}, searched ${searchCount}`);
         });
-        if (result !== -1) logToScreen(`calc A3 [I=${result}] took ${Date.now() - now}ms`);
+        if (result !== -1) logToScreen(`calc A3 [I=${result}] took ${performance.now() - now}ms`);
         return result;
     }
 
@@ -294,11 +294,11 @@ import { Graph } from './lib/graph';
      * @Space O(1) - only things added here are the bbox and search point
      */
     function runA3Optimmized(mesh: FVMesh, point: Point2D) {
-        const now = Date.now();
+        const now = performance.now();
         const result = mesh.findEnclosingFace(point, (faceIndex, searchCount) => {
             logToScreen(`calc A3 OPTIMIZED search at I=${faceIndex}, searched ${searchCount}`);
         });
-        if (result !== -1) logToScreen(`calc A3 OPTIMIZED [I=${result}] took ${Date.now() - now}ms`);
+        if (result !== -1) logToScreen(`calc A3 OPTIMIZED [I=${result}] took ${performance.now() - now}ms`);
         return result;
     }
 
@@ -308,9 +308,9 @@ import { Graph } from './lib/graph';
      * @Space O(V) for visited nodes 
      */
     function runA4(data: FVMeshData, faceIndex: number) {
-        const now = Date.now();
+        const now = performance.now();
         const result = Graph.BFSLayers(data.faceAdjacencies, faceIndex);
-        logToScreen(`calc A4 [F=${data.faces.length} L=${result.length}] took ${Date.now() - now}ms`);
+        logToScreen(`calc A4 [F=${data.faces.length} L=${result.length}] took ${performance.now() - now}ms`);
         return result;
     }
 
