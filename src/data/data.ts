@@ -350,7 +350,7 @@ export const data: PointGraphEdgeData[] = [
     createWeirdoGrid(30, 30, 100, 0, 'weirdo grid edge length 100'),
     createWeirdoGrid(8, 8, 1, 0.2, 'random remove [small]'),
     createWeirdoGrid(30, 30, 100, 0.3, 'random remove [medium]'),
-    // createWeirdoGrid(100, 100, 0.01, 0.3, 'random remove [stress] - slow'),
+    createWeirdoGrid(100, 100, 0.01, 0.3, 'random remove [stress] - slow'),
 ];
 
 
