@@ -273,10 +273,11 @@ import { Graph } from './lib/graph';
      */
     function runA3(data: FVMeshData, point: Point2D) {
         const now = performance.now();
+        let count = 0;
         const result = new FVMesh(data).findEnclosingFace(point, (faceIndex, searchCount) => {
-            logToScreen(`calc A3 search at I=${faceIndex}, searched ${searchCount}`);
+            count = searchCount;
         });
-        if (result !== -1) logToScreen(`calc A3 [I=${result}] took ${performance.now() - now}ms`);
+        if (result !== -1) logToScreen(`calc A3 [I=${result} SEARCHED=${count}] took ${performance.now() - now}ms`);
         return result;
     }
 
@@ -295,10 +296,11 @@ import { Graph } from './lib/graph';
      */
     function runA3Optimmized(mesh: FVMesh, point: Point2D) {
         const now = performance.now();
+        let count = 0;
         const result = mesh.findEnclosingFace(point, (faceIndex, searchCount) => {
-            logToScreen(`calc A3 OPTIMIZED search at I=${faceIndex}, searched ${searchCount}`);
+            count = searchCount;
         });
-        if (result !== -1) logToScreen(`calc A3 OPTIMIZED [I=${result}] took ${performance.now() - now}ms`);
+        if (result !== -1) logToScreen(`calc A3 OPTIMIZED [I=${result}, SEARCHED=${count}] took ${performance.now() - now}ms`);
         return result;
     }
 
