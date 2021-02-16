@@ -285,10 +285,7 @@ export class FVMesh implements Bounded2D {
 
         const meshFaceEdgeAdjacencies: { [edgeId: string]: number[] } = {}
 
-        /**
-         * Run DFS for every edge with a vertex with at least 2 connections
-         */
-        for (let edge of graph.iterableEdges(2)) {
+        for (let edge of graph.iterableEdges()) { /** @NOTE - used to only iterate edges with min index 2, but that's causing some bugs */
 
             const face = findCCWCycleForEdgeDFSStack(edge);
 
