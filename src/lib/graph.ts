@@ -15,7 +15,6 @@ export class Graph {
     protected _adjacencies: AdjacencySet = {};
 
     protected _addEdge(edge: Edge) {
-
         if (this._adjacencies[edge[0]]) {
             this._adjacencies[edge[0]].add(edge[1]);
         } else {
@@ -24,7 +23,6 @@ export class Graph {
     }
 
     protected _removeEdge(edge: Edge) {
-
         if (this._adjacencies[edge[0]]) {
             this._adjacencies[edge[0]].delete(edge[1]);
         }
@@ -119,7 +117,6 @@ export class Graph {
      * @Space O(V)
      */
     static BFSLayers(adjacencyList: AdjacencyList, startNodeIndex: number) {
-
         // output result
         const layers: number[][] = [];
         // list of all visited nodes from the graph

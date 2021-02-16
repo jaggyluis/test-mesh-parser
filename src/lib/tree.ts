@@ -14,18 +14,24 @@ export class QuadTree<T extends Bounded2D> implements Bounded2D {
 
     private readonly _nodes : QuadTree<T>[] = [];
 
+    /**
+     * 
+     * Retrieve the appropriate sub-node for a bounding box
+     * Will return -1 if the bounds does not fit cleanly inside any of the sub-nodes
+     */
     private _nodeIndex(bounds : BoundingBox2D) {
-
         for (let i = 0; i<this._nodes.length; i++) {
             if (this._nodes[i].bounds().containsOther(bounds)) {
                 return i;
             }
         }
-
         return -1;
     }
 
     private _split() {
+
+        // make sure not to split multiple times
+        if (this.hasSubNodes()) return;
 
         const w = this.bounds().dx ;
         const h = this.bounds().dy ;
@@ -41,8 +47,11 @@ export class QuadTree<T extends Bounded2D> implements Bounded2D {
     constructor(private readonly _bounds : BoundingBox2D, private readonly _level : number = 0) {}
 
     bounds() { 
-
         return this._bounds; 
+    }
+
+    hasSubNodes() {
+        return !!this._nodes.length;
     }
 
     *itemsIterator(ignoreSubNodes : number[] = []) : Generator<T> {
@@ -64,10 +73,8 @@ export class QuadTree<T extends Bounded2D> implements Bounded2D {
      */
     insert(item : T, force : boolean = false) {
 
-        if (this._nodes.length) {
-
-            const index = this._nodeIndex(item.bounds());
-            
+        if (this.hasSubNodes()) {
+            const index = this._nodeIndex(item.bounds());   
             if (index != -1) {
                 this._nodes[index].insert(item);
                 return;
@@ -83,7 +90,7 @@ export class QuadTree<T extends Bounded2D> implements Bounded2D {
 
         if (this._items.length > this.MAX_ITEMS && this._level < this.MAX_LEVELS) {
 
-            if (!this._nodes.length) {
+            if (!this.hasSubNodes()) {
                 this._split();
             }
 
@@ -106,7 +113,7 @@ export class QuadTree<T extends Bounded2D> implements Bounded2D {
         // get the subnode index
         const index = this._nodeIndex(bounds);
 
-        if (index !== -1 && this._nodes.length) {
+        if (index !== -1 && this.hasSubNodes()) {
             // search the subnode if a match was foind
             const search = this._nodes[index].search(bounds, filter);
             if (search) {
@@ -134,7 +141,7 @@ export class QuadTree<T extends Bounded2D> implements Bounded2D {
         // get the subnode index
         const index = this._nodeIndex(bounds);
 
-        if (index !== -1 && this._nodes.length) {
+        if (index !== -1 && this.hasSubNodes()) {
             // retrieve any items from the matched tree node
             this._nodes[index].retrieve(bounds, result); 
         }

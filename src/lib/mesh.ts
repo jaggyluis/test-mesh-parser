@@ -1,9 +1,13 @@
 import { Graph, AdjacencyList, Edge } from './graph';
 import { Bounded2D, BoundingBox2D } from './bbox';
-import { angleTwoVectors, Path, Point2D, Vector4D, Polygon2D, Vector2D, vectorTwoPoints, Triangle } from './geometry';
+import { angleTwoVectors, Path, Point2D, Vector4D, Vector2D, vectorTwoPoints, Triangle } from './geometry';
 import { QuadTree } from './tree';
+import { Polygon2D } from './polygon';
 
-export type PointGraphEdgeData = { vertices: Point2D[], edges: Edge[], [key: string]: any }
+export type PointGraphEdgeData = {
+    vertices: Point2D[],
+    edges: Edge[], [key: string]: any
+}
 
 export type FVMeshData = {
     faces: Path[],
@@ -100,7 +104,7 @@ export class FVMesh implements Bounded2D {
      * 
      * @NOTE - should probably find a way to not recompute this
      */
-    private _getFacePolygon(faceIndex : number) : Polygon2D {
+    private _getFacePolygon(faceIndex: number): Polygon2D {
 
         return Polygon2D.fromPath(this._faces[faceIndex], this._vertices);
     }
@@ -112,6 +116,7 @@ export class FVMesh implements Bounded2D {
         this._bounds = BoundingBox2D.fromDimensions(meshData.bounds[0], meshData.bounds[1]);
 
         this._faceLookupTree = new QuadTree<FVMeshFaceBoundedPoint>(this._bounds);
+
         this._faceGraph = new Graph(meshData.faceAdjacencies);
 
         meshData.faces.forEach((f, i) => this._addFace(f, meshData.faceCentroids[i]))
@@ -121,12 +126,11 @@ export class FVMesh implements Bounded2D {
 
     get vertices() { return this._vertices; }
 
-    bounds() { 
-        
+    bounds() {
         return this._bounds;
     }
 
-    triangulatedFace(faceIndex : number) : number[][] {
+    triangulatedFace(faceIndex: number): number[][] {
         if (!this._faceCentroids[faceIndex]) {
             return [];
         } else {
@@ -134,11 +138,10 @@ export class FVMesh implements Bounded2D {
         }
     }
 
-    triangulatedFaces() : number[][][] {
-
-        return this._faces.map((face,i) => this.triangulatedFace(i));
+    triangulatedFaces(): number[][][] {
+        return this._faces.map((face, faceIndex) => this.triangulatedFace(faceIndex));
     }
-    
+
 
     /**
      * 
@@ -161,12 +164,12 @@ export class FVMesh implements Bounded2D {
         const bbox = new BoundingBox2D([point]);
 
         let searchCount = 0;
-        const search : FVMeshFaceBoundedPoint | null = this._faceLookupTree.search(bbox, (facePoint: FVMeshFaceBoundedPoint, faceNode: QuadTree<FVMeshFaceBoundedPoint>) => {
+        const search: FVMeshFaceBoundedPoint | null = this._faceLookupTree.search(bbox, (facePoint: FVMeshFaceBoundedPoint, faceNode: QuadTree<FVMeshFaceBoundedPoint>) => {
 
             onFaceSearched(facePoint.faceIndex, ++searchCount);
 
             if (facePoint.faceBounds().contains(point)) {
-                return  this._getFacePolygon(facePoint.faceIndex).contains(point);      
+                return this._getFacePolygon(facePoint.faceIndex).contains(point);
             }
 
             return false;
@@ -231,7 +234,7 @@ export class FVMesh implements Bounded2D {
         function findCCWCycleForEdgeDFSStack(edge: Edge): Path | null {
 
             const visited = new Set();
-            const paths : Path[] = [edge];
+            const paths: Path[] = [edge];
 
             while (paths.length) {
 

@@ -96,6 +96,10 @@ This will run a live reload version to http://localhost:8080/build/ by default.
 
 This will load the app with all the tests as default, but additional data can be loaded in using the "load graph" button in the top left, and results can be saved using the "save mesh" button on the top right.
 
+Notes:
+
+-	Hovering over the mesh will calculate and color the mesh by adjacency layers away from the hovered face
+-	Enabling the ```cache mesh``` toggle will run the calculations using the mesh class, rather than rebuilding the mesh from scratch on every mouse move event
 
 
 ### Building the Application

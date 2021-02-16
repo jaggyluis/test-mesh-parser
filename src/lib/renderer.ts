@@ -78,8 +78,8 @@ export class WebGLCanvasFVMeshRenderer {
 
     private get _gl() { return this._canvas.getContext('webgl') }
 
-    private _mapIndicesToBuffer(indices: number[][]) {
-        return indices.reduce((buffer, arr) => { buffer.push(...arr); return buffer }, [] as number[]);
+    private _reduceToBuffer(values: number[][]) {
+        return values.reduce((buffer, arr) => { buffer.push(...arr); return buffer }, [] as number[]);
     }
     
     private _updateProjectionMatrix() {
@@ -113,7 +113,7 @@ export class WebGLCanvasFVMeshRenderer {
         const gl = this._gl;
 
         this._meshVBO = this._meshVBO || gl.createBuffer();
-        const vboBuffer = this._mapIndicesToBuffer(vertices); 
+        const vboBuffer = this._reduceToBuffer(vertices); 
 
         gl.bindBuffer(gl.ARRAY_BUFFER, this._meshVBO);
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vboBuffer), gl.STATIC_DRAW);
@@ -133,7 +133,7 @@ export class WebGLCanvasFVMeshRenderer {
         const gl = this._gl;
 
         this._meshIBO = this._meshIBO || gl.createBuffer();
-        const iboBuffer = this._mapIndicesToBuffer(triangleIndices.map(triangleIndexArray => this._mapIndicesToBuffer(triangleIndexArray)));
+        const iboBuffer = this._reduceToBuffer(triangleIndices.map(triangleIndexArray => this._reduceToBuffer(triangleIndexArray)));
 
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this._meshIBO);
         gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(iboBuffer), gl.STATIC_DRAW);
@@ -163,7 +163,7 @@ export class WebGLCanvasFVMeshRenderer {
         const gl = this._gl;
 
         this._meshIBO = this._meshIBO || gl.createBuffer();
-        const iboBuffer = this._mapIndicesToBuffer(faces); 
+        const iboBuffer = this._reduceToBuffer(faces); 
 
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this._meshIBO);
         gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(iboBuffer), gl.STATIC_DRAW);
@@ -190,7 +190,7 @@ export class WebGLCanvasFVMeshRenderer {
         const gl = this._gl;
 
         this._meshIBO = this._meshIBO || gl.createBuffer();
-        const iboBuffer = this._mapIndicesToBuffer(edges);
+        const iboBuffer = this._reduceToBuffer(edges);
 
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this._meshIBO);
         gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(iboBuffer), gl.STATIC_DRAW);

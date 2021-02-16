@@ -178,7 +178,7 @@ import { Graph } from './lib/graph';
 
                 renderer.onMeshMouseMove((point, mouseEvent) => { // this method will return the mouse cursor remapped to the active mesh coordinate system
 
-                    const faceIndex = cache ? runA3Optimmized(mesh, point) : runA3(meshData, point);
+                    const faceIndex = cache ? runA3Cached(mesh, point) : runA3(meshData, point);
 
                     // a new face has appeared!!
                     if (faceIndex >= 0 && faceIndex !== meshFaceIndex) {
@@ -294,13 +294,13 @@ import { Graph } from './lib/graph';
      * 
      * @Space O(1) - only things added here are the bbox and search point
      */
-    function runA3Optimmized(mesh: FVMesh, point: Point2D) {
+    function runA3Cached(mesh: FVMesh, point: Point2D) {
         const now = performance.now();
         let count = 0;
         const result = mesh.findEnclosingFace(point, (faceIndex, searchCount) => {
             count = searchCount;
         });
-        if (result !== -1) logToScreen(`calc A3 OPTIMIZED [I=${result}, SEARCHED=${count}] took ${performance.now() - now}ms`);
+        if (result !== -1) logToScreen(`calc A3 CACHED [I=${result}, SEARCHED=${count}] took ${performance.now() - now}ms`);
         return result;
     }
 
