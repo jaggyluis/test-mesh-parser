@@ -1,5 +1,5 @@
 
-import { Point2D, Vector2D } from './geometry';
+import { Point2D, Vector2D, Vector4D } from './geometry';
 
 export interface Bounded2D {
 
@@ -108,13 +108,20 @@ export class BoundingBox2D {
         yield [dimX[0], dimY[1]] as Point2D;
     }
 
-    static fromDimensions(dimx : Vector2D, dimy : Vector2D) {
-        
-        const bbox = new BoundingBox2D();
-        bbox.update([dimx[0], dimy[0]]);
-        bbox.update([dimx[1], dimy[1]]);
+    toDimensions() : [Vector2D, Vector2D] {
+        return [this.dimX, this.dimY];
+    }
 
-        return bbox;
+    static fromDimensions(dimx : Vector2D, dimy : Vector2D) {
+        return new BoundingBox2D([[dimx[0], dimy[0]], [dimx[1], dimy[1]]])
+    }
+
+    toVector4D() : Vector4D {
+        return [...this.dimX, ...this.dimY];
+    }
+
+    static fromVector4D(data : Vector4D) {
+        return BoundingBox2D.fromDimensions([data[0], data[1]], [data[2], data[3]]);
     }
 }
 

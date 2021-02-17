@@ -1,5 +1,5 @@
 import { Bounded2D } from "./bbox";
-import { Path, Point2D, Vector2D } from "./geometry";
+import { Point2D, Vector2D } from "./geometry";
 import { Edge } from "./graph";
 import { FVMesh } from "./mesh";
 

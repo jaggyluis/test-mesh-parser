@@ -94,7 +94,16 @@ export class Graph {
         return false;
     }
 
-    toJSON() {
+    hasEdge(edge : Edge, directed = false) {
+        const hasDirected = this.hasNeighbor(edge[0], edge[1]);
+        if (directed || hasDirected) {
+            return hasDirected;
+        } else {
+            return this.hasNeighbor(edge[1], edge[0]);
+        }
+    }
+
+    toAdjacencyList() : AdjacencyList {
         const adjacencies: AdjacencyList = {};
         for (let nodeIndex of this.iterableNodeIndices()) {
             adjacencies[nodeIndex] = [...this.iterableNeighborIndices(nodeIndex)];

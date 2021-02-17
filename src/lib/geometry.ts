@@ -10,8 +10,6 @@ export type Point2D = Vector2D;
 
 export type Triangle = [Point2D, Point2D, Point2D];
 
-export type Path = [number, number, ...number[]]; // paths should have at least 2 points
-
 /**
  * 
  * @NOTE -  needed to look this one up actually, it's been a while
