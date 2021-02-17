@@ -4,7 +4,22 @@ live link - https://jaggyluis.github.io/test-mesh-parser/build/
 
 Small mesh parsing application that inputs a set of edges and vertices in the form of : 
 
-```json
+```js
+
+/**
+ * 
+ * Rectangle with diagonal
+ * 
+ * 3 _ _ _ 2
+ * |     / | 
+ * |   /   |   
+ * | /     |     
+ * 0 _ _ _ 1 
+ * 
+ * 
+ * 
+ */
+
 {
 	"vertices": [
 		[0, 0],
@@ -68,20 +83,24 @@ Test Data has the same format as the input data above with the additional option
 {
     ... //same as output data above
     "name": "rectangle with diagonal", // the test name
-    "__faces": [ // expected faces, sorted ascending and joined
+    "__faces": [ // expected faces as a set of vertex indices, sorted ascending and joined
         "0-1-2",
         "0-2-3",
     ],
     "__faceAdjacencies" : { // expected face adjacencies sorted ascending and joined
         "0-1-2": ["0-2-3"],
         "0-2-3": ["0-1-2"],
+		// TODO - should be migrated to use the format below
+		// { [faceIndex : string] : [neighborFaceIndexes : string[]] }
+		"0" : [1],
+		"1" : [0]
     },
-    "__faceLevels" : {
-	// TODO - will test the adjacent face levels
-    },
+    "__faceLevels" : { 	// TODO - will test the adjacent face levels
+ },
     "__facePoints" : [ // point face inclusion test
-	[0.2, 0.1, 0], // [pointX, pointY, expected faceIndex matched to "__faces" order ]
-	[0.5, 0.8, 1] 
+		// [pointX, pointY, expected faceIndex matched to "__faces" order ]
+		[0.2, 0.1, 0], 
+		[0.5, 0.8, 1] 
     ]
 }
 ```
