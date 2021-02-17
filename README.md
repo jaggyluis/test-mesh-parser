@@ -49,10 +49,6 @@ and converts them to a mesh that can be serialized to :
 		"0": [1],
 		"1": [0]
 	},
-	"faceCentroids": [
-		[1, 1, 2, 2], // [centroidX, centroidY, faceBoundsDX, faceBoundsDY]
-		[1, 1, 2, 2]
-	],
 	"vertices": [
 		[0, 0],
 		[2, 0],

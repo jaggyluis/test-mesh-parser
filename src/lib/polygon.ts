@@ -1,7 +1,9 @@
 import { Bounded2D, BoundingBox2D } from "./bbox";
-import { Point2D, vectorCrossZ, vectorTwoPoints, triangleContains, Triangle, Path } from "./geometry";
+import { Point2D, vectorCrossZ, vectorTwoPoints, triangleContains, Triangle } from "./geometry";
 
 export type Id = string | number;
+
+export type Path = [number, number, ...number[]]; // paths should have at least 2 points
 
 export class Polygon2D implements Bounded2D {
 
