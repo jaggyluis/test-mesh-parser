@@ -90,17 +90,17 @@ Test Data has the same format as the input data above with the additional option
     "__faceAdjacencies" : { // expected face adjacencies sorted ascending and joined
         "0-1-2": ["0-2-3"],
         "0-2-3": ["0-1-2"],
-		// TODO - should be migrated to use the format below
-		// { [faceIndex : string] : [neighborFaceIndexes : string[]] }
-		"0" : [1],
-		"1" : [0]
+	// TODO - should be migrated to use the format below
+	// { [faceIndex : string] : [neighborFaceIndexes : string[]] }
+	"0" : [1],
+	"1" : [0]
     },
     "__faceLevels" : { 	// TODO - will test the adjacent face levels
  },
     "__facePoints" : [ // point face inclusion test
-		// [pointX, pointY, expected faceIndex matched to "__faces" order ]
-		[0.2, 0.1, 0], 
-		[0.5, 0.8, 1] 
+	// [pointX, pointY, expected faceIndex matched to "__faces" order ]
+	[0.2, 0.1, 0], 
+	[0.5, 0.8, 1] 
     ]
 }
 ```
