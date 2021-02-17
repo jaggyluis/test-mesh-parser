@@ -24,17 +24,17 @@ class FVMeshFaceBoundedPoint implements Bounded2D {
 
     /**
      * 
-     * @param _bounds bounding box for the face
+     * @param _faceBounds bounding box for the face
      * @param faceIndex face identifier
      */
-    constructor(private readonly _bounds: BoundingBox2D, public readonly faceIndex: number) { }
+    constructor(private readonly _faceBounds: BoundingBox2D, public readonly faceIndex: number) { }
 
     /**
      * This is the bounds that will be used for the QuadTree lookup
      */
     bounds() {
 
-        return new BoundingBox2D([this._bounds.centroid]);
+        return new BoundingBox2D([this._faceBounds.centroid]);
     }
 
     /**
@@ -42,7 +42,7 @@ class FVMeshFaceBoundedPoint implements Bounded2D {
      */
     faceBounds() {
 
-        return this._bounds;
+        return this._faceBounds;
     }
 }
 
