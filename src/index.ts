@@ -237,12 +237,6 @@ import { Graph } from './lib/graph';
         return menuItem;
     }
 
-    // **************** ALGORITHMS ****************
-
-    /**
-     * @Time O(E*(V+ElogE)) = O((E^2)*(VLogE)) worst case 
-     * @Space O(E + V)
-     */
     function runA1(data: PointGraphEdgeData): FVMeshData {
         const now = performance.now();
         const result = FVMesh.fromPointGraphEdgeData(data).toJSON();
@@ -250,11 +244,6 @@ import { Graph } from './lib/graph';
         return result;
     }
 
-    /**
-     * @Time O(1) hashmap lookup
-     * @Space O(1) existing hashmap lookup - no new data
-     * 
-     */
     function runA2(data: FVMeshData, faceIndex: number): number[] {
         const now = performance.now();
         const result = data.faceAdjacencies[faceIndex] || [];
@@ -262,15 +251,6 @@ import { Graph } from './lib/graph';
         return result;
     }
 
-    /**
-     * 
-     * @Time O(A1) + O(A3-below), since currently we need to rebuild the mesh to access the quadtree,
-     * although with an implementation of a static method that runs on the FVMeshData similar to A2 above, it should 
-     * drop down to o(A3-below) = O(F*V) 
-     * 
-     * @Space  O(A1) + O(A3-below) = O(A1) + O(1) = O(A1) = O(E + V);
-     * 
-     */
     function runA3(data: FVMeshData, point: Point2D) {
         const now = performance.now();
         let count = 0;
@@ -281,19 +261,6 @@ import { Graph } from './lib/graph';
         return result;
     }
 
-    /**
-     * 
-     * @Time 
-     * 
-     * H - Height of QuadTree
-     * N - max number of elements per bucket
-     * Fv - Vertex count for face
-     * 
-     * worst - (O(F*Fv) - search every face and compute polygon for every face 
-     * average ( O(H *(N * Fv)) )
-     * 
-     * @Space O(1) - only things added here are the bbox and search point
-     */
     function runA3Cached(mesh: FVMesh, point: Point2D) {
         const now = performance.now();
         let count = 0;
@@ -304,11 +271,6 @@ import { Graph } from './lib/graph';
         return result;
     }
 
-    /**
-     * 
-     * @Time O(E + V) BFS
-     * @Space O(V) for visited nodes 
-     */
     function runA4(data: FVMeshData, faceIndex: number) {
         const now = performance.now();
         const result = Graph.BFSLayers(data.faceAdjacencies, faceIndex);
