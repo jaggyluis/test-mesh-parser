@@ -125,16 +125,6 @@ export class FVMesh implements Bounded2D {
     }
 
     /**
-     * 
-     * @Time 
-     * worst - (O(F*V)) - search every face and compute polygon for every face 
-     * 
-     * H - Height of QuadTree
-     * N - max number of elements per bucket
-     * V - Vertex count for face
-     * 
-     * average (O(H + N * V)))
-     * 
      * @param onFaceSearched utility method for logging status
      */
     findEnclosingFace(point: Point2D, onFaceSearched: (faceIndex: number, searchCount: number) => void = () => { }): number {
@@ -171,7 +161,6 @@ export class FVMesh implements Bounded2D {
     }
 
     /**
-     * @Time O(E*(V+ElogE)) = O(E*2VLogE) worst case (1 big cycle)
      * @param pointGraphEdgeData input data for A1
      */
     static fromPointGraphEdgeData(pointGraphEdgeData: PointGraphEdgeData) {
@@ -192,19 +181,6 @@ export class FVMesh implements Bounded2D {
         /**
          * 
          * DFS method to find the next CCW point to add to an existing path.
-         * @Time - O(V+ElogE)
-         * need to check every edge on every vertex best is O(F) where F is the number of vertices on the face - i.e a grid will only search 3 depths
-         * but worst case we need to check nearly every edge for a given vertex 
-         * 
-         * @Space - O(V + V*E) => O(V*E) 
-         * set of visited vertices + size of stack
-         * 
-         * @NOTE - this could probably be optimized to track the current winding of the path while 
-         * the search is happening, so that it can only return paths with a CCW winding.
-         * Right now we need to return the path and then check its winding as a Pgon later .
-         * 
-         * The original implementation of this method was recursive,
-         * but I hit the max call stack on larger meshes
          *  
          */
         function findCCWCycleForEdgeDFSStack(edge: Edge): Path | null {
