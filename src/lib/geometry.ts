@@ -12,7 +12,6 @@ export type Triangle = [Point2D, Point2D, Point2D];
 
 /**
  * 
- * @NOTE -  needed to look this one up actually, it's been a while
  * @link https://bl.ocks.org/shancarter/1034db3e675f2d3814e6006cf31dbfdc
  * 
  */
