@@ -111,20 +111,12 @@ export class Graph {
         return adjacencies;
     }
 
-    /**
-     * @Time O(E)
-     * @Space O(E+V) 
-     */
     static fromEdges(edges: Edge[] = []) {
         const graph = new Graph();
         edges.forEach(edge => graph.addEdge(edge));
         return graph;
     }
 
-    /**
-     * @Time O(E+V)
-     * @Space O(V)
-     */
     static BFSLayers(adjacencyList: AdjacencyList, startNodeIndex: number) {
         // output result
         const layers: number[][] = [];
@@ -136,10 +128,6 @@ export class Graph {
         while (queue.length) {
             // building the output layer here from the set
             const layer = [];
-            /** 
-             * @NOTE - unfortunately we cant use an O(1) queue in js without a custom LinkedList class,
-             *  so this is O(n) where n is the queue length  
-             */
             const layerSet = queue.shift() as Set<number>;
             // next layer to iterate - will be added to the result once it comes off the queue 
             const layerSetNext = new Set<number>();
