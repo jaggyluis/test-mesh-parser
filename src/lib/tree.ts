@@ -67,10 +67,6 @@ export class QuadTree<T extends Bounded2D> implements Bounded2D {
         }
     }
 
-    /**
-     * 
-     * @Time O(n) - we might need to split the node and re-insert all items 
-     */
     insert(item : T, force : boolean = false) {
 
         if (this.hasSubNodes()) {
@@ -106,7 +102,6 @@ export class QuadTree<T extends Bounded2D> implements Bounded2D {
      * Post order traversal of the Quad tree with bounds as a heuristic
      * If a filter is provided, it will be used a a mapper function to determine if a result has been bound
      * 
-     * @Time - worst case O(n), 
      */
     search(bounds : BoundingBox2D, filter : (item : T, node : QuadTree<T> ) => boolean = () => true ) : T | null {
 
